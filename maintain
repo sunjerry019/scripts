@@ -1,0 +1,301 @@
+#!/bin/bash
+
+TC='\e['
+
+CLR_LINE_START="${TC}1K"
+CLR_LINE_END="${TC}K"
+CLR_LINE="${TC}2K"
+
+Bold="${TC}1m"    # Bold text only, keep colors
+Undr="${TC}4m"    # Underline text only, keep colors
+Inv="${TC}7m"     # Inverse: swap background and foreground colors
+Reg="${TC}22;24m" # Regular text only, keep colors
+RegF="${TC}39m"   # Regular foreground coloring
+RegB="${TC}49m"   # Regular background coloring
+Rst="${TC}0m"     # Reset all coloring and style
+
+Red="${TC}31m";
+White="${TC}37m";
+Cyan="${TC}36m";
+Green="${TC}32m";
+Purple="${TC}35m";
+Yellow="${TC}33m";
+
+ROOT_UID="0";
+UPDATEONLY=0;
+CLEANONLY=0;
+NOTEXLIVE=0;
+NOUPDATEMIRROR=0;
+
+# Absolute path to this script, e.g. /home/user/bin/foo.sh
+#SCRIPT=$(readlink -f "$0")
+# Absolute path this script is in, thus /home/user/bin
+#SCRIPTPATH=$(dirname "$SCRIPT")
+
+#Check if run as root
+#if [ "$UID" -ne "$ROOT_UID" ] ; then
+#	#echo -e "${Bold}${Red}\n\tPlease run this with root!\n${Rst}"
+#	sudo ${SCRIPT}
+#	exit 1
+#fi
+
+#alias alert_helper='history|tail -n1|sed -e "s/^\s*[0-9]\+\s*//" -e "s/;\s*alert$//"'
+#alias alert='notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "[$?] $(alert_helper)"'
+
+#check for flags
+while getopts ctum opt; do
+	case $opt in
+		c)
+			echo "Cleaning only...." >&2
+			CLEANONLY=1
+			;;
+		t)
+			echo "Not updating TexLive..." >&2
+			NOTEXLIVE=1
+			;;
+		u)
+			echo "Jumping straight to updates..." >&2
+			UPDATEONLY=1
+			;;
+		m)
+			echo "Skipping reflector mirror update..." >&2
+			NOUPDATEMIRROR=1
+			;;
+		\?)
+			echo "Invalid option: -$OPTARG" >&2
+			;;
+	esac
+done
+
+# notify code
+function notifyError
+{
+	# alternatively notifyError()
+	# notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "maintain" $1
+	notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/applications-system-orange.svg "maintain" "$1"
+
+}
+
+function notifyUser
+{
+	# alternatively notifyError()
+	notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "maintain" "$1"
+	# notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/applications-system-orange.svg "maintain" $1
+
+}
+
+# Define the sections of code to run
+function cleanPackages
+{
+	##### removes orphaned packages
+	echo -e "${Bold}${Cyan}::${White} Removing orphaned packages...${Rst}"
+	OP=$(pacman -Qdtq)
+
+	if [ -n "$OP" ]; then
+		yaourt -Rns $OP
+	else
+		echo -e "${Bold}${Cyan}==>${Rst}${White} No orphaned packages ${Rst}"
+	fi
+
+	echo -ne "\033]0;System Maintenance\007"
+
+	#removing unneeded cache packages
+	echo -e "${Bold}${Cyan}::${White} Removing all cached versions of each package, except for the most recent 3...${Rst}"
+	sudo paccache -r
+	
+	echo -e "${Bold}${Cyan}::${White} Removing all cached versions of uninstalled packages...${Rst}"
+	sudo paccache -ruk0
+}
+
+function updateMirrorlist
+{
+	echo -ne "\033]0;System Maintenance\007"
+
+	##### This will run reflector on mirrorlist, copying from backup first, overwriting
+	echo -e "${Bold}${Cyan}::${White} Running reflector to update mirrorlist...${Rst}"
+
+	##### Make backup just in case something goes wrong
+	sudo cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.lastworkingcopy
+
+	##### get mirrorlist
+	sudo curl -o /etc/pacman.d/mirrorlist.backup https://www.archlinux.org/mirrorlist/all/
+	sudo cp /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
+	sudo reflector --verbose -l 200 -p http --sort rate --save /etc/pacman.d/mirrorlist
+
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Reflector encountered an error${Rst}"
+		echo -e "${Bold}${Cyan}==> ${Red}restoring...${White} Reverting to previous copy of mirrorlist${Rst}"
+		notifyError "reflector error"
+		sudo mv /etc/pacman.d/mirrorlist.lastworkingcopy /etc/pacman.d/mirrorlist
+		exit 1
+	else
+		sudo rm /etc/pacman.d/mirrorlist.lastworkingcopy
+	fi
+}
+
+function updateSystem
+{
+	echo -ne "\033]0;System Maintenance\007"
+
+	##### update the system
+	echo -e "${Bold}${Cyan}::${White} Updating the system...${Rst}"
+	yaourt -Syua --devel --noconfirm
+	#yaourt -S $(pacman -Qqm)
+
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} yaourt encountered an error updating the system${Rst}"
+		notifyError "yaourt error"
+		exit 1
+	fi
+}
+
+function cleanup
+{
+	echo -ne "\033]0;System Maintenance\007"
+
+	##### update firefox
+	#echo -e "${Bold}${Cyan}::${White} Updating Firefox specifically...${Rst}"
+	#yaourt -S firefox-aurora --noconfirm
+
+	#if [ $? -ne 0 ]; then
+	#	echo -e "${Bold}${Cyan}==> ${Red}error:${White} yaourt encountered an error updating the firefox developer${Rst}"
+	#	exit 1
+	#fi
+
+	echo -e "${Bold}${Cyan}::${White} Cleaning up Firefox installation...${Rst}"
+	echo -e "${Bold}${Cyan}::${White} Removing Firefox Safe Mode desktop file...${Rst}"
+
+	if [ -f "/usr/share/applications/firefox-aurora-safe.desktop" ]; then 
+		sudo mv "/usr/share/applications/firefox-aurora-safe.desktop" "/usr/share/applications/firefox-aurora-safe.desktop.bak"
+		if [ $? -ne 0 ]; then
+			echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while moving firefox-aurora-safe.desktop${Rst}"
+			notifyError "moving firefox-aurora-safe.desktop error"
+			exit 1
+		fi
+	fi
+
+	echo -e "${Bold}${Cyan}::${White} Making a backup of current Firefox desktop file...${Rst}"
+
+	sudo cp "/usr/share/applications/firefox-aurora.desktop" "/usr/share/applications/firefox-aurora.desktop.bak"
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while backing up firefox-aurora.desktop${Rst}"
+		notifyError "firefox-aurora.desktop backup error"
+		exit 1
+	fi
+
+	echo -e "${Bold}${Cyan}::${White} Copying modified Firefox desktop file...${Rst}"
+
+	sudo cp "/home/sunyudong/AUR/firefox-aurora/firefox-aurora.desktop" "/usr/share/applications/firefox-aurora.desktop"
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-aurora.desktop...reverting...${Rst}"
+		sudo cp "/usr/share/applications/firefox-aurora.desktop.bak" "/usr/share/applications/firefox-aurora.desktop"
+		notifyError "copying firefox-aurora.desktop error"
+		exit 1
+	fi
+
+	echo -e "${Bold}${Cyan}::${White} Copying Firefox dockitem file...${Rst}"
+
+	sudo cp "/home/sunyudong/AUR/firefox-aurora/firefox-aurora.dockitem" "/home/sunyudong/.config/plank/dock1/launchers/firefox-aurora.dockitem"
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-aurora.dockitem...${Rst}"
+		notifyError "copying firefox-aurora.dockitem error"
+		exit 1
+	fi
+
+	echo -e "${Bold}${Cyan}::${White} Restarting plank...${Rst}"
+	killall plank
+	nohup plank &
+}
+
+function backupPackages
+{
+	echo -ne "\033]0;System Maintenance\007"
+
+	##### makes a backup of all packages installed
+	echo -e "${Bold}${Cyan}::${White} Making a backup of the current packages installed...${Rst}"
+	##### from official repos
+	sudo -- sh -c 'pacman -Qqe | grep -v "$(pacman -Qqm)" > /opt/backup/pacman.lst'
+
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up current packages installed${Rst}"
+		notifyError "current packages backup error"
+		exit 1
+	fi
+
+	##### from AUR
+	sudo -- sh -c 'pacman -Qqm > /opt/backup/aur.lst'
+
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up AUR packages installed${Rst}"
+		notifyError "AUR backup error"
+		exit 1
+	fi
+
+	##### Python packages
+	sudo -- sh -c 'pip list | sed -r "s:\s:\t:g" > /opt/backup/pypi.lst'
+
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up python packages installed${Rst}"
+		notifyError "pip backup error"
+		exit 1
+	fi
+}
+
+function updateTexLive
+{
+	echo -ne "\033]0;System Maintenance\007"
+
+	##### update texlive
+	echo -e "${Bold}${Cyan}::${White} Updating TeXLive installation...${Rst}"
+	tlmgr update --self
+
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} tlmgr encountered an error updating itself${Rst}"
+		notifyError "tlmgr update error"
+		exit 1
+	fi
+
+	echo -ne "\033]0;System Maintenance\007"
+	tlmgr update --all
+
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} tlmgr encountered an error updating the TeXLive installation${Rst}"
+		notifyError "TexLive update error"
+		exit 1
+	fi
+}
+
+sudo echo -ne "\033]0;System Maintenance\007"
+echo -e "${Bold}${Green}::${White} Starting sudo -v ${Rst}"
+while : ; do sudo -v; sleep 30; done &
+
+if [ $? -eq 0 ]; then
+
+	if [ $CLEANONLY -eq 0 ]; then
+		if [ $UPDATEONLY -eq 0 ]; then
+			cleanPackages
+			if [ $NOUPDATEMIRROR -eq 0 ]; then
+				updateMirrorlist
+			fi
+		fi
+		updateSystem
+	fi
+
+	cleanup
+	cleanPackages
+	backupPackages
+
+	if [ $NOTEXLIVE -eq 0 ]; then
+		updateTexLive
+	fi
+
+	echo -e "${Bold}${Green}::${White} Killing sudo -v ${Rst}"
+	kill %1
+	sudo -k
+	
+	echo -e "${Bold}${Green}::${White} Done!${Rst}"
+	notifyUser "System Maintenance Done!"
+
+else
+    exit 1
+fi

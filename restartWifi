@@ -1,0 +1,2 @@
+sudo ip link set wlp2s0 down
+sudo ip link set wlp2s0 up
