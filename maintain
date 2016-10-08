@@ -163,7 +163,7 @@ function cleanup
 	#fi
 
 	echo -e "${Bold}${Cyan}::${White} Cleaning up Firefox installation...${Rst}"
-	echo -e "${Bold}${Cyan}::${White} Removing Firefox Safe Mode desktop file...${Rst}"
+	echo -e "${Bold}${Cyan}> ::${White} Removing Firefox Safe Mode desktop file...${Rst}"
 
 	if [ -f "/usr/share/applications/firefox-aurora-safe.desktop" ]; then 
 		sudo mv "/usr/share/applications/firefox-aurora-safe.desktop" "/usr/share/applications/firefox-aurora-safe.desktop.bak"
@@ -174,7 +174,7 @@ function cleanup
 		fi
 	fi
 
-	echo -e "${Bold}${Cyan}::${White} Making a backup of current Firefox desktop file...${Rst}"
+	echo -e "${Bold}${Cyan}> ::${White} Making a backup of current Firefox desktop file...${Rst}"
 
 	sudo cp "/usr/share/applications/firefox-aurora.desktop" "/usr/share/applications/firefox-aurora.desktop.bak"
 	if [ $? -ne 0 ]; then
@@ -183,7 +183,7 @@ function cleanup
 		exit 1
 	fi
 
-	echo -e "${Bold}${Cyan}::${White} Copying modified Firefox desktop file...${Rst}"
+	echo -e "${Bold}${Cyan}> ::${White} Copying modified Firefox desktop file...${Rst}"
 
 	sudo cp "/home/sunyudong/AUR/firefox-aurora/firefox-aurora.desktop" "/usr/share/applications/firefox-aurora.desktop"
 	if [ $? -ne 0 ]; then
@@ -193,7 +193,7 @@ function cleanup
 		exit 1
 	fi
 
-	echo -e "${Bold}${Cyan}::${White} Copying Firefox dockitem file...${Rst}"
+	echo -e "${Bold}${Cyan}> ::${White} Copying Firefox dockitem file...${Rst}"
 
 	sudo cp "/home/sunyudong/AUR/firefox-aurora/firefox-aurora.dockitem" "/home/sunyudong/.config/plank/dock1/launchers/firefox-aurora.dockitem"
 	if [ $? -ne 0 ]; then
@@ -202,7 +202,7 @@ function cleanup
 		exit 1
 	fi
 
-	echo -e "${Bold}${Cyan}::${White} Restarting plank...${Rst}"
+	echo -e "${Bold}${Cyan}> ::${White} Restarting plank...${Rst}"
 	killall plank
 	nohup plank &
 }
