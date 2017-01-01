@@ -149,9 +149,9 @@ function updateSystem
 	fi
 }
 
-function cleanup
-{
-	echo -ne "\033]0;System Maintenance\007"
+#function cleanup
+#{
+	# echo -ne "\033]0;System Maintenance\007"
 
 	##### update firefox
 	#echo -e "${Bold}${Cyan}::${White} Updating Firefox specifically...${Rst}"
@@ -162,50 +162,50 @@ function cleanup
 	#	exit 1
 	#fi
 
-	echo -e "${Bold}${Cyan}::${White} Cleaning up Firefox installation...${Rst}"
-	echo -e "${Bold}${Cyan}> ::${White} Removing Firefox Safe Mode desktop file...${Rst}"
+	# echo -e "${Bold}${Cyan}::${White} Cleaning up Firefox installation...${Rst}"
+	# echo -e "${Bold}${Cyan}> ::${White} Removing Firefox Safe Mode desktop file...${Rst}"
 
-	if [ -f "/usr/share/applications/firefox-aurora-safe.desktop" ]; then 
-		sudo mv "/usr/share/applications/firefox-aurora-safe.desktop" "/usr/share/applications/firefox-aurora-safe.desktop.bak"
-		if [ $? -ne 0 ]; then
-			echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while moving firefox-aurora-safe.desktop${Rst}"
-			notifyError "moving firefox-aurora-safe.desktop error"
-			exit 1
-		fi
-	fi
+	# if [ -f "/usr/share/applications/firefox-aurora-safe.desktop" ]; then 
+	#	sudo mv "/usr/share/applications/firefox-aurora-safe.desktop" "/usr/share/applications/firefox-aurora-safe.desktop.bak"
+	#	if [ $? -ne 0 ]; then
+	#		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while moving firefox-aurora-safe.desktop${Rst}"
+	#		notifyError "moving firefox-aurora-safe.desktop error"
+	#		exit 1
+	#	fi
+	# fi
 
-	echo -e "${Bold}${Cyan}> ::${White} Making a backup of current Firefox desktop file...${Rst}"
+	# echo -e "${Bold}${Cyan}> ::${White} Making a backup of current Firefox desktop file...${Rst}"
 
-	sudo cp "/usr/share/applications/firefox-aurora.desktop" "/usr/share/applications/firefox-aurora.desktop.bak"
-	if [ $? -ne 0 ]; then
-		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while backing up firefox-aurora.desktop${Rst}"
-		notifyError "firefox-aurora.desktop backup error"
-		exit 1
-	fi
+	# sudo cp "/usr/share/applications/firefox-aurora.desktop" "/usr/share/applications/firefox-aurora.desktop.bak"
+	# if [ $? -ne 0 ]; then
+	#	echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while backing up firefox-aurora.desktop${Rst}"
+	#	notifyError "firefox-aurora.desktop backup error"
+	#	exit 1
+	# fi
 
-	echo -e "${Bold}${Cyan}> ::${White} Copying modified Firefox desktop file...${Rst}"
+	# echo -e "${Bold}${Cyan}> ::${White} Copying modified Firefox desktop file...${Rst}"
 
-	sudo cp "/home/sunyudong/AUR/firefox-aurora/firefox-aurora.desktop" "/usr/share/applications/firefox-aurora.desktop"
-	if [ $? -ne 0 ]; then
-		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-aurora.desktop...reverting...${Rst}"
-		sudo cp "/usr/share/applications/firefox-aurora.desktop.bak" "/usr/share/applications/firefox-aurora.desktop"
-		notifyError "copying firefox-aurora.desktop error"
-		exit 1
-	fi
+	# sudo cp "/home/sunyudong/AUR/firefox-aurora/firefox-aurora.desktop" "/usr/share/applications/firefox-aurora.desktop"
+	# if [ $? -ne 0 ]; then
+	#	echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-aurora.desktop...reverting...${Rst}"
+	#	sudo cp "/usr/share/applications/firefox-aurora.desktop.bak" "/usr/share/applications/firefox-aurora.desktop"
+	#	notifyError "copying firefox-aurora.desktop error"
+	#	exit 1
+	# fi
 
-	echo -e "${Bold}${Cyan}> ::${White} Copying Firefox dockitem file...${Rst}"
+	# echo -e "${Bold}${Cyan}> ::${White} Copying Firefox dockitem file...${Rst}"
 
-	sudo cp "/home/sunyudong/AUR/firefox-aurora/firefox-aurora.dockitem" "/home/sunyudong/.config/plank/dock1/launchers/firefox-aurora.dockitem"
-	if [ $? -ne 0 ]; then
-		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-aurora.dockitem...${Rst}"
-		notifyError "copying firefox-aurora.dockitem error"
-		exit 1
-	fi
+	# sudo cp "/home/sunyudong/AUR/firefox-aurora/firefox-aurora.dockitem" "/home/sunyudong/.config/plank/dock1/launchers/firefox-aurora.dockitem"
+	# if [ $? -ne 0 ]; then
+	#	echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-aurora.dockitem...${Rst}"
+	#	notifyError "copying firefox-aurora.dockitem error"
+	#	exit 1
+	# fi
 
-	echo -e "${Bold}${Cyan}> ::${White} Restarting plank...${Rst}"
-	killall plank
-	nohup plank &
-}
+	# echo -e "${Bold}${Cyan}> ::${White} Restarting plank...${Rst}"
+	# killall plank
+	# nohup plank &
+#}
 
 function backupPackages
 {
@@ -232,7 +232,9 @@ function backupPackages
 	fi
 
 	##### Python packages
-	sudo -- sh -c 'pip list | sed -r "s:\s:\t:g" > /opt/backup/pypi.lst'
+	#sudo -- sh -c 'pip list | sed -r "s:\s:\t:g" > /opt/backup/pypi.lst'
+	sudo -- sh -c 'pip list --format=columns > /opt/backup/pypi.lst'
+	
 
 	if [ $? -ne 0 ]; then
 		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up python packages installed${Rst}"
@@ -281,7 +283,7 @@ if [ $? -eq 0 ]; then
 		updateSystem
 	fi
 
-	cleanup
+	# cleanup
 	cleanPackages
 	backupPackages
 
