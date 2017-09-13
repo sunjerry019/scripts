@@ -1,0 +1,18 @@
+#!/bin/python3
+
+"""
+gfonts: manager for google fonts
+	-u, --update								Keep the Git Repo up to date
+	-a, --addfonts <font1> <font2> ...			Add a new font from the repo to the system
+	-v, --verbose
+
+http://stackoverflow.com/questions/600079/how-do-i-clone-a-subdirectory-only-of-a-git-repository/28039894#13738951
+Last Updated: 28 May 2017
+"""
+
+from argparse import argparse
+
+cd /mnt/data/GoogleFonts/
+git pull origin master
+
+fc-cache
