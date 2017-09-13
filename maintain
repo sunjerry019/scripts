@@ -147,10 +147,22 @@ function updateSystem
 		notifyError "yaourt error"
 		exit 1
 	fi
+
+	echo -ne "\033]0;System Maintenance\007"
+
+	##### update pip packages
+	echo -e "${Bold}${Cyan}::${White} Updating Python pip packages...${Rst}"
+	pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | sudo xargs -n1 pip install -U
+
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} pip encountered an error updating packages${Rst}"
+		notifyError "pip update error"
+		exit 1
+	fi
 }
 
-#function cleanup
-#{
+function cleanup
+{
 	# echo -ne "\033]0;System Maintenance\007"
 
 	##### update firefox
@@ -193,19 +205,19 @@ function updateSystem
 	#	exit 1
 	# fi
 
-	# echo -e "${Bold}${Cyan}> ::${White} Copying Firefox dockitem file...${Rst}"
+	echo -e "${Bold}${Cyan}> ::${White} Copying Firefox dockitem file...${Rst}"
 
-	# sudo cp "/home/sunyudong/AUR/firefox-aurora/firefox-aurora.dockitem" "/home/sunyudong/.config/plank/dock1/launchers/firefox-aurora.dockitem"
-	# if [ $? -ne 0 ]; then
-	#	echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-aurora.dockitem...${Rst}"
-	#	notifyError "copying firefox-aurora.dockitem error"
-	#	exit 1
-	# fi
+	sudo cp "/home/sunyudong/AUR/firefox/firefox-developer.dockitem" "/home/sunyudong/.config/plank/dock1/launchers/firefox-developer.dockitem"
+	if [ $? -ne 0 ]; then
+		echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-developer.dockitem...${Rst}"
+		notifyError "copying firefox-developer.dockitem error"
+		exit 1
+	fi
 
-	# echo -e "${Bold}${Cyan}> ::${White} Restarting plank...${Rst}"
-	# killall plank
-	# nohup plank &
-#}
+	echo -e "${Bold}${Cyan}> ::${White} Restarting plank...${Rst}"
+	killall plank
+	nohup plank &
+}
 
 function backupPackages
 {
