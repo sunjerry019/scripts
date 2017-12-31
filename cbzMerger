@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # For CBZs downloaded with HakuNeko
+# Ensure original folder of CBZs are in page-order when sorted alphabetically A-Z
 
 ORIGWORKDIR=$(pwd)
 
