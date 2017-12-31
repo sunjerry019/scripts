@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# For CBZs downloaded with HakuNeko
+
 ORIGWORKDIR=$(pwd)
 
 if [[ -z $1 ]]; then
