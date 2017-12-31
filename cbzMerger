@@ -2,7 +2,7 @@
 
 ORIGWORKDIR=$(pwd)
 
-if [[ -z $1 ]; then
+if [[ -z $1 ]]; then
 	PRINWORKDIR="$1"
 else
 	PRINWORKDIR="./"
