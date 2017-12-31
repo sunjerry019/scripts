@@ -23,7 +23,7 @@ do
 	HEAD=$(basename "$f" .cbz)
 
 	if [[ $HEAD == *":"* ]]; then
-		HEAD=$(echo "$HEAD" | tr ":" "\n" | head -n 1 | sed 's/[^0-9]//g')
+		HEAD=$(echo "$HEAD" | tr ":" "\n" | head -n 1)
 	fi
 
 	for g in *
