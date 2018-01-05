@@ -26,6 +26,8 @@ UPDATEONLY=0;
 CLEANONLY=0;
 NOTEXLIVE=0;
 NOUPDATEMIRROR=0;
+NOUPDATEPIP=0;
+NOSYSTEMUPDATE=1
 
 # Absolute path to this script, e.g. /home/user/bin/foo.sh
 #SCRIPT=$(readlink -f "$0")
@@ -43,14 +45,29 @@ NOUPDATEMIRROR=0;
 #alias alert='notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "[$?] $(alert_helper)"'
 
 #check for flags
-while getopts ctum opt; do
+while getopts hctumpx opt; do
 	case $opt in
+		h)
+			echo ""
+			echo -e "\t-h \t Display help"
+			echo -e "\t-c \t Cleaning only"
+			echo -e "\t-u \t Jump straight to updates; Skip cleaning and reflector before update"
+			echo -e "\t-t \t Skip TexLive update"
+			echo -e "\t-m \t Skip reflector mirror update"
+			echo -e "\t-p \t Skip pip update"
+			echo -e "\t-x \t Skip system update"
+			echo ""
+			echo -e "\t-muxt \t Just update pip"
+			echo -e "\t-muxp \t Just update TexLive"
+			echo ""
+			exit 0
+			;;
 		c)
 			echo "Cleaning only...." >&2
 			CLEANONLY=1
 			;;
 		t)
-			echo "Not updating TexLive..." >&2
+			echo "Skipping TexLive updates..." >&2 # Not updating TexLive
 			NOTEXLIVE=1
 			;;
 		u)
@@ -61,8 +78,17 @@ while getopts ctum opt; do
 			echo "Skipping reflector mirror update..." >&2
 			NOUPDATEMIRROR=1
 			;;
+		p)
+			echo "Skipping pip update..." >&2
+			NOUPDATEPIP=1
+			;;
+		x)
+			echo "Skipping system update..." >&2
+			NOSYSTEMUPDATE=1
+			;;
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
+			echo "Use option -h for help" >&2
 			;;
 	esac
 done
@@ -147,7 +173,10 @@ function updateSystem
 		notifyError "yaourt error"
 		exit 1
 	fi
+}
 
+function updatePip
+{
 	echo -ne "\033]0;System Maintenance\007"
 
 	##### update pip packages
@@ -292,7 +321,14 @@ if [ $? -eq 0 ]; then
 				updateMirrorlist
 			fi
 		fi
-		updateSystem
+
+		if [ $NOSYSTEMUPDATE -eq 0 ]; then
+			updateSystem
+		fi
+
+		if [ $NOUPDATEPIP -eq 0 ]; then
+			updatePip
+		fi
 	fi
 
 	# cleanup
