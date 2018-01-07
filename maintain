@@ -335,8 +335,10 @@ if [ $? -eq 0 ]; then
 	cleanPackages
 	backupPackages
 
-	if [ $NOTEXLIVE -eq 0 ]; then
-		updateTexLive
+	if [ $CLEANONLY -eq 0 ]; then
+		if [ $NOTEXLIVE -eq 0 ]; then
+			updateTexLive
+		fi
 	fi
 
 	echo -e "${Bold}${Green}::${White} Killing sudo -v ${Rst}"
