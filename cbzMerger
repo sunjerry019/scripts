@@ -2,48 +2,83 @@
 
 # For CBZs downloaded with HakuNeko
 # Ensure original folder of CBZs are in page-order when sorted alphabetically A-Z
+# Rename covers to -000_cover.png/jpg
 
 ORIGWORKDIR=$(pwd)
 
-if [[ -z $1 ]]; then
+if [[ ! -z $1 ]]; then
 	PRINWORKDIR="$1"
 else
 	PRINWORKDIR="./"
 fi
 
-cd "$PRINWORKDIR"
+function Merge()
+{
+	cd "$PRINWORKDIR"
 
-mkdir cbz_working
-
-for f in *.cbz
-do
-	DIR="./cbz_working/$f"
-	unzip "$f" -d "$DIR"
-	cd "$DIR"
-
-	HEAD=$(basename "$f" .cbz)
-
-	if [[ $HEAD == *":"* ]]; then
-		HEAD=$(echo "$HEAD" | tr ":" "\n" | head -n 1)
+	filearray=(`find ./ -maxdepth 1 -name "*.cbz"`)
+	if [[ ${#filearray[@]} -gt 0 ]]; then
+		echo "Files found.";
+	else
+		echo "Files not found. Exiting";
+		exit;
 	fi
 
-	for g in *
+	mkdir cbz_working
+
+	if [[ -f "-000_cover.png" ]]; then
+		echo "Found cover (png)"
+		cp "-000_cover.png" cbz_working/
+	elif [[ -f "-000_cover.jpg" ]]; then
+		echo "Found cover (jpg)"
+		cp "-000_cover.jpg" cbz_working/
+	fi
+
+	for f in *.cbz
 	do
-		mv "$g" "$HEAD"_"$g"
+		DIR="./cbz_working/$f"
+		unzip "$f" -d "$DIR"
+		cd "$DIR"
+
+		HEAD=$(basename "$f" .cbz)
+
+		if [[ $HEAD == *":"* ]]; then
+			HEAD=$(echo "$HEAD" | tr ":" "\n" | head -n 1)
+		fi
+
+		for g in *
+		do
+			mv "$g" "$HEAD"_"$g"
+		done
+
+		mv * ../
+		cd ../../
+		rmdir "$DIR"
 	done
 
-	mv * ../
-	cd ../../
-	rmdir "$DIR"
+	cd cbz_working
+
+	zip -mr "combined.zip" *
+	mv "combined.zip" "combined.cbz"
+
+	mv combined.cbz "$ORIGWORKDIR/"
+
+	cd ..
+
+	rmdir cbz_working
+
+}
+
+echo ""
+echo "Operating from \"$ORIGWORKDIR\"."
+while true; do
+    read -p "Combining .cbz files in \"$PRINWORKDIR\". Proceed (y/n)? " yn
+    case $yn in
+        [Yy]* ) break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
 done
+echo ""
 
-cd cbz_working
-
-zip -mr "combined.zip" *
-mv "combined.zip" "combined.cbz"
-
-mv combined.cbz "$ORIGWORKDIR/"
-
-cd ..
-
-rmdir cbz_working
+Merge
