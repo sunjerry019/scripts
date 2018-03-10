@@ -1,0 +1,1 @@
+sudo gnome-desktop-item-edit --create-new /usr/share/applications/

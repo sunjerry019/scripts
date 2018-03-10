@@ -1,0 +1,17 @@
+#!/bin/bash
+# https://superuser.com/a/164857
+
+echo "Converting $1 to Grayscale"
+
+BASE=$(basename "$1" .pdf)
+
+gs \
+ -sOutputFile="$BASE".grayscale.pdf \
+ -sDEVICE=pdfwrite \
+ -sColorConversionStrategy=Gray \
+ -dProcessColorModel=/DeviceGray \
+ -dCompatibilityLevel=1.4 \
+ -dAutoRotatePages=/None \
+ -dNOPAUSE \
+ -dBATCH \
+ "$1"

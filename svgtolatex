@@ -1,0 +1,2 @@
+FILE=$(basename "$1" .svg)
+inkscape -D -z --file=$FILE.svg --export-pdf=$FILE.pdf --export-latex
