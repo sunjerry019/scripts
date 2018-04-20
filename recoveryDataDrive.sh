@@ -72,17 +72,20 @@ function backup
 {
 	printf "${Bold}${Green} Generating filelist for master directory...\r${Rst}"
 		cd $master_dir
-		find > $master_filelist
+		find > "$master_filelist"
+		find -not \( -path ./Linux/working -prune \) > "$master_filelist.trim"
 	printf "${Bold}${Green} Generating filelist for master directory...Done\n${Rst}"
 
 	printf "${Bold}${Green} Generating filelist for backup directory...\r${Rst}"
 		cd $backup_dir
 		# https://stackoverflow.com/a/16595367
-		find -not \( -path ./0_Archive -prune \) > $backup_filelist
+		find -not \( -path ./0_Archive -prune \) > "$backup_filelist"
 	printf "${Bold}${Green} Generating filelist for backup directory...Done\n${Rst}"
 
 	printf "${Bold}${Green} Running rsync...\n${Rst}"
-	rsync -aAuvX --progress "$master_dir/" "$backup_dir"
+	tail -n +2 "$master_filelist.trim" > "$master_filelist.trim.cut"
+	rsync -aAuvX --files-from="$master_filelist.trim.cut" --progress "$master_dir/" "$backup_dir"
+	rm "$master_filelist.trim.cut"
 
 	#	-a = archive = -rlptgoD
 	#		-r = recursive
