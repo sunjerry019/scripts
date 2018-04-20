@@ -1,0 +1,15 @@
+#!/bin/bash
+
+cd ~/tex/
+YEAR=$(date +"%Y")
+LYEAR=$((YEAR-1))
+mkdir $YEAR
+cd $YEAR
+wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+tar -xvzf install-tl-unx.tar.gz
+cd $(ls -d */ | head -n 1)
+tlmgr uninstall
+# sudo sed -i 's_texlive/$LYEAR_texlive/$YEAR_g' ~/.bash_profile ~/.profile /etc/profile.d/tex.sh /etc/profile.d/tex.csh 
+sudo sed -i 's_texlive/$LYEAR_texlive/$YEAR_g' /etc/profile.d/tex.sh /etc/profile.d/tex.csh 
+./install-tl
+
