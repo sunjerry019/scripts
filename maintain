@@ -213,10 +213,12 @@ function updatePip
 	echo -e "${Bold}${Cyan}::${White} Updating Python pip packages...${Rst}"
 	OUTDATED=$(pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1)
 
-	# https://unix.stackexchange.com/a/146945
+	# https://unix.stackexchange.com/a/146945 -z "${OUTDATED// }"
 
-	if [[ -z "${OUTDATED// }" ]]; then
-		echo $OUTDATED | sudo xargs -n1 pip install -U
+	if [[ -n "$OUTDATED" ]]; then
+		echo "$OUTDATED" | sudo xargs -n1 pip install -U
+	else
+		echo -e "${Bold}${Cyan}==>${Rst}${White} No outdated pip packages ${Rst}"
 	fi
 
 	if [ $? -ne 0 ]; then
