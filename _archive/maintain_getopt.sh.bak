@@ -1,0 +1,47 @@
+while getopts hctumpx opt; do
+	case $opt in
+		h)
+			echo ""
+			echo -e "\t-h \t Display help"
+			echo -e "\t-c \t Cleaning only"
+			echo -e "\t-u \t Jump straight to updates; Skip cleaning and reflector before update"
+			echo -e "\t-t \t Skip TexLive update"
+			echo -e "\t-m \t Skip reflector mirror update"
+			echo -e "\t-p \t Skip pip update"
+			echo -e "\t-x \t Skip system update"
+			echo ""
+			echo -e "\t-muxt \t Just update pip"
+			echo -e "\t-muxp \t Just update TexLive"
+			echo ""
+			exit 0
+			;;
+		c)
+			echo "Cleaning only...." >&2
+			CLEANONLY=1
+			;;
+		t)
+			echo "Skipping TexLive updates..." >&2 # Not updating TexLive
+			NOTEXLIVE=1
+			;;
+		u)
+			echo "Jumping straight to updates..." >&2
+			UPDATEONLY=1
+			;;
+		m)
+			echo "Skipping reflector mirror update..." >&2
+			NOUPDATEMIRROR=1
+			;;
+		p)
+			echo "Skipping pip update..." >&2
+			NOUPDATEPIP=1
+			;;
+		x)
+			echo "Skipping system update..." >&2
+			NOSYSTEMUPDATE=1
+			;;
+		\?)
+			echo "Invalid option: -$OPTARG" >&2
+			echo "Use option -h for help" >&2
+			;;
+	esac
+done

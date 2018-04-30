@@ -45,52 +45,82 @@ NOSYSTEMUPDATE=0;
 #alias alert='notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "[$?] $(alert_helper)"'
 
 #check for flags
-while getopts hctumpx opt; do
-	case $opt in
-		h)
+OPTIONS=hctumpx
+LONGOPTIONS=help,cleanup,skiptexlive,skiptoupdate,nomirror,nopip,nosystemupdate
+
+# https://stackoverflow.com/a/29754866
+
+# -temporarily store output to be able to check for errors
+# -e.g. use “--options” parameter by name to activate quoting/enhanced mode
+# -pass arguments only via   -- "$@"   to separate them correctly
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+if [[ $? -ne 0 ]]; then
+    # e.g. $? == 1
+    #  then getopt has complained about wrong arguments to stdout
+    exit 2
+fi
+# read getopt’s output this way to handle the quoting right:
+eval set -- "$PARSED"
+
+# now enjoy the options in order and nicely split until we see --
+while true; do
+    case "$1" in
+        -h|--help)
 			echo ""
-			echo -e "\t-h \t Display help"
-			echo -e "\t-c \t Cleaning only"
-			echo -e "\t-u \t Jump straight to updates; Skip cleaning and reflector before update"
-			echo -e "\t-t \t Skip TexLive update"
-			echo -e "\t-m \t Skip reflector mirror update"
-			echo -e "\t-p \t Skip pip update"
-			echo -e "\t-x \t Skip system update"
+			echo -e "\t-h --help \t\t Display help"
+			echo -e "\t-c --cleanup \t\t Cleaning only"
+			echo -e "\t-u --skiptoupdate \t Jump straight to updates; Skip cleaning and reflector before update"
+			echo -e "\t-t --skiptexlive \t Skip TexLive update"
+			echo -e "\t-m --nomirror \t\t Skip reflector mirror update"
+			echo -e "\t-p --nopip \t\t Skip pip update"
+			echo -e "\t-x --nosystemupdate \t Skip system update"
 			echo ""
 			echo -e "\t-muxt \t Just update pip"
 			echo -e "\t-muxp \t Just update TexLive"
 			echo ""
 			exit 0
-			;;
-		c)
+            shift
+            ;;
+        -c|--cleanup)
 			echo "Cleaning only...." >&2
 			CLEANONLY=1
+			shift
 			;;
-		t)
+		-t|--skiptexlive)
 			echo "Skipping TexLive updates..." >&2 # Not updating TexLive
 			NOTEXLIVE=1
+			shift
 			;;
-		u)
+		-u|--skiptoupdate)
 			echo "Jumping straight to updates..." >&2
 			UPDATEONLY=1
+			shift
 			;;
-		m)
+		-m|--nomirror)
 			echo "Skipping reflector mirror update..." >&2
 			NOUPDATEMIRROR=1
+			shift
 			;;
-		p)
+		-p|--nopip)
 			echo "Skipping pip update..." >&2
 			NOUPDATEPIP=1
+			shift
 			;;
-		x)
+		-x|--nosystemupdate)
 			echo "Skipping system update..." >&2
 			NOSYSTEMUPDATE=1
+			shift
 			;;
-		\?)
-			echo "Invalid option: -$OPTARG" >&2
-			echo "Use option -h for help" >&2
-			;;
-	esac
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "options error" >&2
+            echo "Use option -h or --help for help" >&2
+            exit 3
+            ;;
+    esac
 done
 
 # notify code
@@ -181,7 +211,13 @@ function updatePip
 
 	##### update pip packages
 	echo -e "${Bold}${Cyan}::${White} Updating Python pip packages...${Rst}"
-	pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | sudo xargs -n1 pip install -U
+	OUTDATED=$(pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1)
+
+	# https://unix.stackexchange.com/a/146945
+
+	if [[ -z "${OUTDATED// }" ]]; then
+		echo $OUTDATED | sudo xargs -n1 pip install -U
+	fi
 
 	if [ $? -ne 0 ]; then
 		echo -e "${Bold}${Cyan}==> ${Red}error:${White} pip encountered an error updating packages${Rst}"
