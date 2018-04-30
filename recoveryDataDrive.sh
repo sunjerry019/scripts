@@ -73,7 +73,7 @@ function backup
 	printf "${Bold}${Green} Generating filelist for master directory...\r${Rst}"
 		cd $master_dir
 		find > "$master_filelist"
-		find -not \( -path ./Linux/working -prune \) > "$master_filelist.trim"
+		find -not \( -path ./Linux/working -prune \) -not \( -path ./Cloud/Dropbox -prune \) > "$master_filelist.trim"
 	printf "${Bold}${Green} Generating filelist for master directory...Done\n${Rst}"
 
 	printf "${Bold}${Green} Generating filelist for backup directory...\r${Rst}"
