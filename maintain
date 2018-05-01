@@ -348,6 +348,7 @@ function updateTexLive
 
 sudo echo -ne "\033]0;System Maintenance\007"
 echo -e "${Bold}${Green}::${White} Starting sudo -v ${Rst}"
+# https://serverfault.com/a/205504
 while : ; do sudo -v; sleep 30; done & sudopid=$!
 
 if [ $? -eq 0 ]; then
