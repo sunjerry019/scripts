@@ -68,7 +68,7 @@ while true; do
         -h|--help)
             echo ""
             echo -e "\t-h --help \t\t Display help"
-            echo -e "\t-c --cleanup \t\t Cleaning only"
+            echo -e "\t-c --cleanup \t\t Clean and backup only (equivalent to -muxtp)"
             echo -e "\t-u --skiptoupdate \t Jump straight to updates; Skip cleaning and reflector before update"
             echo -e "\t-t --skiptexlive \t Skip TexLive update"
             echo -e "\t-m --nomirror \t\t Skip reflector mirror update"
@@ -77,13 +77,12 @@ while true; do
             echo ""
             echo -e "\t-muxt \t Just update pip"
             echo -e "\t-muxp \t Just update TexLive"
-            echo -e "\t-muxtp \t Just cleanup and backup"
             echo ""
             exit 0
             shift
             ;;
         -c|--cleanup)
-            echo "Cleaning only...." >&2
+            echo "Cleaning and backing up only...." >&2
             CLEANONLY=1
             shift
             ;;
