@@ -1,0 +1,27 @@
+#!/bin/bash
+
+paper="A4"
+
+if [ $# -eq 3 ] || [ $# -eq 4 ]
+then
+	if [ $# -eq 4 ]; then
+		paper=$4
+	fi
+
+	if [ $1 -gt 1 ]; then
+  		pdftk A=$2 B="/home/sunyudong/scripts/pdftools/blank_$paper.pdf" cat A1-$(($1-1)) B1 A$1-end output $3
+  	else
+  		pdftk A=$2 B="/home/sunyudong/scripts/pdftools/blank_$paper.pdf" cat B1 A$1-end output $3
+  	fi
+else
+	echo "Usage example: pdfInsertBlankPageAt 5 src.pdf res.pdf [A4, Letter]"
+	echo "Default to A4"
+	exit $E_BADARGS
+fi 
+
+# https://unix.stackexchange.com/a/15995 [How to add blank page]
+# https://unix.stackexchange.com/a/277987 [How to Create Blank PDF]
+
+# convert xc:none -page Letter a.pdf
+# convert xc:none -page A4 a.pdf
+# convert xc:none -page 842x595 a.pdf

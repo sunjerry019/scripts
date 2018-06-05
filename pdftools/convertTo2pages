@@ -1,0 +1,1 @@
+pdfnup -o output.pdf input.pdf --a4paper
