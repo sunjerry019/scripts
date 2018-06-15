@@ -27,6 +27,7 @@ CLEANONLY=0;
 NOTEXLIVE=0;
 NOUPDATEMIRROR=0;
 NOUPDATEPIP=0;
+NOUPDATEPECL=0;
 NOSYSTEMUPDATE=0;
 
 # Absolute path to this script, e.g. /home/user/bin/foo.sh
@@ -73,10 +74,11 @@ while true; do
             echo -e "\t-t --skiptexlive \t Skip TexLive update"
             echo -e "\t-m --nomirror \t\t Skip reflector mirror update"
             echo -e "\t-p --nopip \t\t Skip pip update"
+            echo -e "\t-P --noPECL \t\t Skip PECL update"
             echo -e "\t-x --nosystemupdate \t Skip system update"
             echo ""
-            echo -e "\t-muxt \t Just update pip"
-            echo -e "\t-muxp \t Just update TexLive"
+            echo -e "\t-muxPt \t Just update pip"
+            echo -e "\t-muxPp \t Just update TexLive"
             echo ""
             exit 0
             shift
@@ -104,6 +106,11 @@ while true; do
         -p|--nopip)
             echo "Skipping pip update..." >&2
             NOUPDATEPIP=1
+            shift
+            ;;
+        -P|--noPCEL)
+            echo "Skipping PECL update..." >&2
+            NOUPDATEPECL=1
             shift
             ;;
         -x|--nosystemupdate)
@@ -223,6 +230,23 @@ function updatePip
 
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} pip encountered an error updating packages${Rst}"
+        notifyError "pip update error"
+        exit 1
+    fi
+}
+
+
+function updatePecl
+{
+    echo -ne "\033]0;System Maintenance\007"
+
+    ##### update pip packages
+    echo -e "${Bold}${Cyan}::${White} Updating PECL packages...${Rst}"
+    sudo pecl update-channels
+    sudo pecl upgrade
+
+    if [ $? -ne 0 ]; then
+        echo -e "${Bold}${Cyan}==> ${Red}error:${White} pecl encountered an error updating packages${Rst}"
         notifyError "pip update error"
         exit 1
     fi
@@ -367,6 +391,10 @@ if [ $? -eq 0 ]; then
 
         if [ $NOUPDATEPIP -eq 0 ]; then
             updatePip
+        fi
+
+        if [ $NOUPDATEPECL -eq 0 ]; then
+            updatePecl
         fi
     fi
 
