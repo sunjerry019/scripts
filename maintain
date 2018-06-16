@@ -230,8 +230,8 @@ function updatePip
 
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} pip encountered an error updating packages${Rst}"
-        notifyError "pip update error"
-        exit 1
+        notifyError "pip update error; errors ignored"
+        # exit 1
     fi
 }
 
