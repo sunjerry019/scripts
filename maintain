@@ -46,8 +46,8 @@ NOSYSTEMUPDATE=0;
 #alias alert='notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "[$?] $(alert_helper)"'
 
 #check for flags
-OPTIONS=hctumpx
-LONGOPTIONS=help,cleanup,skiptexlive,skiptoupdate,nomirror,nopip,nosystemupdate
+OPTIONS=hctumpPx
+LONGOPTIONS=help,cleanup,skiptexlive,skiptoupdate,nomirror,nopip,noPECL,nosystemupdate
 
 # https://stackoverflow.com/a/29754866
 
@@ -108,7 +108,7 @@ while true; do
             NOUPDATEPIP=1
             shift
             ;;
-        -P|--noPCEL)
+        -P|--noPECL)
             echo "Skipping PECL update..." >&2
             NOUPDATEPECL=1
             shift
@@ -203,11 +203,12 @@ function updateSystem
     ##### update the system
     echo -e "${Bold}${Cyan}::${White} Updating the system...${Rst}"
     yaourt -Syua --devel --noconfirm
+    #aurman -Syu --devel --noconfirm --noedit
     #yaourt -S $(pacman -Qqm)
 
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} yaourt encountered an error updating the system${Rst}"
-        notifyError "yaourt error"
+        notifyError "aurman error"
         exit 1
     fi
 }
