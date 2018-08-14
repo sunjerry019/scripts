@@ -1,0 +1,6 @@
+#!/bin/bash
+git rm -r --cached .
+git add .
+echo ""
+echo ".gitignore reapplied, please commit changes"
+echo ""
