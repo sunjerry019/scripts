@@ -1,0 +1,1 @@
+nohup /home/sunyudong/scripts/reversessh > ~/reversessh.out 2> ~/reversessh.err < /dev/null
