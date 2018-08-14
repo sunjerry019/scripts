@@ -2,7 +2,7 @@
 
 # For CBZs downloaded with HakuNeko
 # Ensure original folder of CBZs are in page-order when sorted alphabetically A-Z
-# Rename covers to -000_cover.png/jpg
+# Rename covers to !000_cover.png/jpg
 
 ORIGWORKDIR=$(pwd)
 
@@ -26,12 +26,12 @@ function Merge()
 
 	mkdir cbz_working
 
-	if [[ -f "-000_cover.png" ]]; then
+	if [[ -f "!000_cover.png" ]]; then
 		echo "Found cover (png)"
-		cp "-000_cover.png" cbz_working/
-	elif [[ -f "-000_cover.jpg" ]]; then
+		cp "!000_cover.png" cbz_working/
+	elif [[ -f "!000_cover.jpg" ]]; then
 		echo "Found cover (jpg)"
-		cp "-000_cover.jpg" cbz_working/
+		cp "!000_cover.jpg" cbz_working/
 	fi
 
 	for f in *.cbz
