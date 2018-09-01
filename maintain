@@ -29,6 +29,7 @@ NOUPDATEMIRROR=0;
 NOUPDATEPIP=0;
 NOUPDATEPECL=0;
 NOSYSTEMUPDATE=0;
+NOUPDATEFISH=0;
 
 # Absolute path to this script, e.g. /home/user/bin/foo.sh
 #SCRIPT=$(readlink -f "$0")
@@ -46,8 +47,8 @@ NOSYSTEMUPDATE=0;
 #alias alert='notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "[$?] $(alert_helper)"'
 
 #check for flags
-OPTIONS=hctumpPx
-LONGOPTIONS=help,cleanup,skiptexlive,skiptoupdate,nomirror,nopip,noPECL,nosystemupdate
+OPTIONS=hctumpPxf
+LONGOPTIONS=help,cleanup,skiptexlive,skiptoupdate,nomirror,nopip,noPECL,nosystemupdate,nofish
 
 # https://stackoverflow.com/a/29754866
 
@@ -76,9 +77,10 @@ while true; do
             echo -e "\t-p --nopip \t\t Skip pip update"
             echo -e "\t-P --noPECL \t\t Skip PECL update"
             echo -e "\t-x --nosystemupdate \t Skip system update"
+            echo -e "\t-f --nofish \t Skip fish/omf update"
             echo ""
-            echo -e "\t-muxPt \t Just update pip"
-            echo -e "\t-muxPp \t Just update TexLive"
+            echo -e "\t-muxfPt \t Just update pip"
+            echo -e "\t-muxfPp \t Just update TexLive"
             echo ""
             exit 0
             shift
@@ -116,6 +118,11 @@ while true; do
         -x|--nosystemupdate)
             echo "Skipping system update..." >&2
             NOSYSTEMUPDATE=1
+            shift
+            ;;
+        -f|--nofish)
+            echo "Skipping fish/omf update..." >&2
+            NOUPDATEFISH=1
             shift
             ;;
         --)
@@ -371,6 +378,19 @@ function updateTexLive
     fi
 }
 
+function updateFish
+{
+    echo -ne "\033]0;System Maintenance\007"
+    echo -e "${Bold}${Cyan}::${White} Updating fish/omf...${Rst}"
+    fish -c "omf update"
+
+    if [ $? -ne 0 ]; then
+        echo -e "${Bold}${Cyan}==> ${Red}error:${White} error encountered updating omf${Rst}"
+        notifyError "omf update error"
+        exit 1
+    fi
+}
+
 sudo echo -ne "\033]0;System Maintenance\007"
 echo -e "${Bold}${Green}::${White} Starting sudo -v ${Rst}"
 # https://serverfault.com/a/205504
@@ -396,6 +416,10 @@ if [ $? -eq 0 ]; then
 
         if [ $NOUPDATEPECL -eq 0 ]; then
             updatePecl
+        fi
+
+        if [ $NOUPDATEFISH -eq 0 ]; then
+            updateFish
         fi
     fi
 
