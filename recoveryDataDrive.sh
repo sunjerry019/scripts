@@ -11,7 +11,7 @@ Rst="${TC}0m"     # Reset all coloring and style
 Green="${TC}32m";
 
 master_dir="/mnt/data"
-backup_dir="/run/media/sunyudong/YDBackup/LenovoLaptopBackup/Data_(D)"
+backup_dir="/run/media/sunyudong/YDPassport/LenovoLaptopBackup/Data_(D)"
 master_filelist="$backup_dir/../Data_D_masterfilelist.bak"
 backup_filelist="$backup_dir/../Data_D_backupfilelist.bak"
 #diff_filelist="$backup_dir/../Data_D_filelist.diff.bak"
