@@ -14,8 +14,12 @@ master_dir="/mnt/data"
 backup_dir="/run/media/sunyudong/YDPassport/LenovoLaptopBackup/Data_(D)"
 master_filelist="$backup_dir/../Data_D_masterfilelist.bak"
 backup_filelist="$backup_dir/../Data_D_backupfilelist.bak"
+
 #diff_filelist="$backup_dir/../Data_D_filelist.diff.bak"
 #invdiff_filelist="$backup_dir/../Data_D_filelist.diff.inv.bak"
+
+arch_master_dir="/opt/backup"
+arch_backup_dir="/run/media/sunyudong/YDPassport/LenovoLaptopBackup/Arch_FS/opt/backup"
 
 
 #master_dir="/home/sunyudong/1" # trailing slash necessary when running rsync
@@ -103,6 +107,13 @@ function backup
 	printf "${Bold}${Green} Running rsync...Done\n${Rst}"
 }
 
+function backup_arch
+{
+	printf "${Bold}${Green} Backing up arch opt...\n${Rst}"
+	rsync -aAuvX --progress "$arch_master_dir/" "$arch_backup_dir"
+	printf "${Bold}${Green} Backing up arch opt...Done\n${Rst}"
+}
+
 function f_restore
 {
 	# restoring using $master_filelist
@@ -119,6 +130,7 @@ function f_restore
 if [ $restorefiles -eq 1 ]; then
 	f_restore
 else
+	backup_arch
 	backup
 fi
 
