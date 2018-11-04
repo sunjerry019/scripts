@@ -1,2 +1,3 @@
+#!/bin/bash
 FILE=$(basename "$1" .svg)
 inkscape --file=$FILE.svg --export-area-page --without-gui --export-pdf=$FILE.pdf
