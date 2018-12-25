@@ -396,12 +396,35 @@ function updateFish
     fi
 }
 
+function control_c() {
+    echo -e "\n>>>> Killing sudo -v, and processes $sudopid $thispid $childpid"
+    sudo -k
+    kill $sudopid
+    kill $thispid
+    # kill $childpid
+    exit 1
+}
+
+thispid=$$
+# childpid=$BASHPID
+
 sudo echo -ne "\033]0;System Maintenance\007"
+if [ $? -ne 0 ]; then
+    control_c
+fi
 echo -e "${Bold}${Green}::${White} Starting sudo -v ${Rst}"
 # https://serverfault.com/a/205504
 while : ; do sudo -v; sleep 30; done & sudopid=$!
 
 if [ $? -eq 0 ]; then
+
+    if sudo -n true 2>/dev/null; then 
+        echo "sudo activated"
+        trap control_c SIGINT
+    else
+        echo "I don't have sudo"
+        control_c
+    fi
 
     if [ $CLEANONLY -eq 0 ]; then
         if [ $UPDATEONLY -eq 0 ]; then
@@ -444,6 +467,7 @@ if [ $? -eq 0 ]; then
     
     echo -e "${Bold}${Green}::${White} Done!${Rst}"
     notifyUser "System Maintenance Done!"
+    control_c
 
 else
     exit 1
