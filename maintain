@@ -213,7 +213,7 @@ function updateSystem
     ##### update the system
     echo -e "${Bold}${Cyan}::${White} Updating the system...${Rst}"
  
-    yay -Syu --upgrademenu --combinedupgrade --devel --answerclean N --answeredit N --answerupgrade N --noafterclean --noconfirm 
+    yay -Syu --upgrademenu --combinedupgrade --devel --answerclean N --answeredit N --answerupgrade N --noafterclean --noconfirm
     #yaourt -Syua --devel --noconfirm
     #aurman -Syu --devel --noconfirm --noedit
     #yaourt -S $(pacman -Qqm)
@@ -221,6 +221,7 @@ function updateSystem
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} yay encountered an error updating the system${Rst}"
         notifyError "yay error"
+        control_c
         exit 1
     fi
 }
@@ -261,6 +262,7 @@ function updatePecl
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} pecl encountered an error updating packages${Rst}"
         notifyError "pip update error"
+        control_c
         exit 1
     fi
 }
@@ -315,6 +317,7 @@ function cleanup
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-developer.dockitem...${Rst}"
         notifyError "copying firefox-developer.dockitem error"
+        control_c
         exit 1
     fi
 
@@ -335,6 +338,7 @@ function backupPackages
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up current packages installed${Rst}"
         notifyError "current packages backup error"
+        control_c
         exit 1
     fi
 
@@ -344,6 +348,7 @@ function backupPackages
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up AUR packages installed${Rst}"
         notifyError "AUR backup error"
+        control_c
         exit 1
     fi
 
@@ -355,6 +360,7 @@ function backupPackages
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up python packages installed${Rst}"
         notifyError "pip backup error"
+        control_c
         exit 1
     fi
 }
@@ -370,6 +376,7 @@ function updateTexLive
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} tlmgr encountered an error updating itself${Rst}"
         notifyError "tlmgr update error"
+        control_c
         exit 1
     fi
 
@@ -379,6 +386,7 @@ function updateTexLive
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} tlmgr encountered an error updating the TeXLive installation${Rst}"
         notifyError "TexLive update error"
+        control_c
         exit 1
     fi
 }
@@ -392,6 +400,7 @@ function updateFish
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} error encountered updating omf${Rst}"
         notifyError "omf update error"
+        control_c
         exit 1
     fi
 }
@@ -467,8 +476,12 @@ if [ $? -eq 0 ]; then
     
     echo -e "${Bold}${Green}::${White} Done!${Rst}"
     notifyUser "System Maintenance Done!"
-    control_c
+    echo -e "\n>>>> Killing sudo -v, and processes $sudopid $thispid $childpid"
+    sudo -k
+    kill $sudopid
+    kill $thispid
 
 else
+    control_c
     exit 1
 fi
