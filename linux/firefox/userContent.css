@@ -1,0 +1,28 @@
+/** userContent.css
+***************************/
+
+:root[hasbrowserhandlers="true"] body.serif #reader-domain,
+:root[hasbrowserhandlers="true"] body.sans-serif #reader-domain,
+:root[hasbrowserhandlers="true"] body.serif #reader-estimated-time,
+:root[hasbrowserhandlers="true"] body.sans-serif #reader-estimated-time
+{
+	font-family: monospace !important;
+}
+
+/* When dark background is selected */
+:root[hasbrowserhandlers="true"] body.dark  {
+}
+/* When light background is selected */
+:root[hasbrowserhandlers="true"] body.light {
+}
+/* When sepia background is selected */
+:root[hasbrowserhandlers="true"] body.sepia {
+}
+/* When serif font is selected */
+:root[hasbrowserhandlers="true"] body.serif {
+	font-family: serif !important;
+}
+/* When sans-serif font is selected */
+:root[hasbrowserhandlers="true"] body.sans-serif {
+	font-family: sans-serif !important;
+}
