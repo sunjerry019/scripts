@@ -1,0 +1,4 @@
+#!/bin/bash
+
+pip list | tail +3 | cut -d" " -f1 | xargs pip show -f | grep "filename"
+https://stackoverflow.com/a/33484229
