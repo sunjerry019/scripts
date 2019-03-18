@@ -23,6 +23,11 @@ function fish_prompt --description 'Write out the prompt'
     if not set -q __fish_git_prompt_color_cleanstate
         set -g __fish_git_prompt_color_cleanstate brgreen
     end
+
+    # Set Characters
+    # https://mariuszs.github.io/blog/2013/informative_git_prompt.html
+    set -g __fish_git_prompt_char_stagedstate "•"
+    set -g __fish_git_prompt_char_dirtystate "+"
     
     if test -z $WINDOW
         printf '[%s%s%s@%s%s] %s%s%s%s > ' (set_color brgreen) (whoami) (set_color brcyan) (prompt_hostname) (set_color normal) (set_color $fish_color_cwd) (prompt_pwd) (set_color normal) (__fish_git_prompt)
