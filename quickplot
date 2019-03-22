@@ -1,0 +1,2 @@
+#!/bin/bash
+gnuplot -e "set term qt; plot '$1';" --persist
