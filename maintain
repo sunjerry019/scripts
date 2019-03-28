@@ -232,6 +232,10 @@ function updatePip
 
     ##### update pip packages
     echo -e "${Bold}${Cyan}::${White} Updating Python pip packages...${Rst}"
+
+    # update pip itself
+    # sudo pip install --upgrade pip
+
     OUTDATED=$(pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1)
 
     # https://unix.stackexchange.com/a/146945 -z "${OUTDATED// }"
