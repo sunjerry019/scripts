@@ -1,5 +1,10 @@
 #!/bin/bash
 
+addr=$1
+[ -z "$1" ] && addr="192.168.1.1"
+
+printf ":: using address $addr\n"
+
 locked=1
 declare -A passwords
 
@@ -33,12 +38,12 @@ IFS=$IFS_backup
 # 
 
 printf ":: mounting Public...\n"
-sudo mount -t cifs -o uid=1000,gid=1000,user=,pass= //192.168.1.1/Public /mnt/seagate/public/
+sudo mount -t cifs -o uid=1000,gid=1000,user=,pass= //$addr/Public /mnt/seagate/public/
 
 for name in "${!passwords[@]}"; do 
 	printf ":: mounting $name\n"
 	#echo "$name - ${passwords[$name]}";
-	sudo mount -t cifs -o uid=1000,gid=1000,user="$name",pass="${passwords[$name]}" "//192.168.1.1/$name" "/mnt/seagate/$name"
+	sudo mount -t cifs -o uid=1000,gid=1000,user="$name",pass="${passwords[$name]}" "//$addr/$name" "/mnt/seagate/$name"
 done
 
 
