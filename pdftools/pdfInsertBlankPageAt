@@ -8,16 +8,25 @@ then
 		paper=$4
 	fi
 
-	if [ $1 -gt 1 ]; then
-  		pdftk A=$2 B="/home/sunyudong/scripts/pdftools/blank_$paper.pdf" cat A1-$(($1-1)) B1 A$1-end output $3
+	pages=$(strings < "$2" | sed -n 's|.*/Count -\{0,1\}\([0-9]\{1,\}\).*|\1|p' | sort -rn | head -n 1)
+
+	echo "PDF has $pages pages => Inserting page $1."
+
+	if [ $1 -gt $pages ]; then
+		# Add to the end of the pdf
+  		pdftk A="$2" B="/home/sunyudong/scripts/pdftools/blank_$paper.pdf" cat A1-end B1 output "$3"
+	elif [ $1 -gt 1 ]; then
+		# Add somewhere in the middle
+  		pdftk A="$2" B="/home/sunyudong/scripts/pdftools/blank_$paper.pdf" cat A1-$(($1-1)) B1 A$1-end output "$3"
   	else
-  		pdftk A=$2 B="/home/sunyudong/scripts/pdftools/blank_$paper.pdf" cat B1 A$1-end output $3
+		# Add to the start
+  		pdftk A="$2" B="/home/sunyudong/scripts/pdftools/blank_$paper.pdf" cat B1 A$1-end output "$3"
   	fi
 else
 	echo "Usage example: pdfInsertBlankPageAt 5 src.pdf res.pdf [A4, Letter]"
 	echo "Default to A4"
 	exit $E_BADARGS
-fi 
+fi
 
 # https://unix.stackexchange.com/a/15995 [How to add blank page]
 # https://unix.stackexchange.com/a/277987 [How to Create Blank PDF]
