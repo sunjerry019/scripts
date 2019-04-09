@@ -8,6 +8,7 @@ then
 		paper=$4
 	fi
 
+	# https://stackoverflow.com/a/14736593/3211506
 	pages=$(strings < "$2" | sed -n 's|.*/Count -\{0,1\}\([0-9]\{1,\}\).*|\1|p' | sort -rn | head -n 1)
 
 	echo "PDF has $pages page(s) => Inserting at page $1."
