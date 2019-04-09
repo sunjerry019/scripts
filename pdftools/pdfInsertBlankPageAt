@@ -10,7 +10,7 @@ then
 
 	pages=$(strings < "$2" | sed -n 's|.*/Count -\{0,1\}\([0-9]\{1,\}\).*|\1|p' | sort -rn | head -n 1)
 
-	echo "PDF has $pages pages => Inserting page $1."
+	echo "PDF has $pages page(s) => Inserting at page $1."
 
 	if [ $1 -gt $pages ]; then
 		# Add to the end of the pdf
@@ -24,7 +24,7 @@ then
   	fi
 else
 	echo "Usage example: pdfInsertBlankPageAt 5 src.pdf res.pdf [A4, Letter]"
-	echo "Default to A4"
+	echo "Defaults to A4"
 	exit $E_BADARGS
 fi
 
