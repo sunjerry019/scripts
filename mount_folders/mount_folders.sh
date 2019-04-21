@@ -1,7 +1,7 @@
 #!/bin/bash
 
 addr=$1
-[ -z "$1" ] && addr="192.168.1.1"
+[ -z "$1" ] && addr="192.168.1.2"
 
 printf ":: using address $addr\n"
 
