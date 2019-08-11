@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=/usr/bin/gdk-pixbuf-thumbnailer
+Exec=/usr/bin/gdk-pixbuf-thumbnailer -s %s %u %o
+MimeType=image/png;image/bmp;image/x-bmp;image/x-MS-bmp;image/gif;image/x-icon;image/x-ico;image/x-win-bitmap;image/vnd.microsoft.icon;application/ico;image/ico;image/icon;text/ico;application/x-navi-animation;image/jpeg;image/x-portable-anymap;image/x-portable-bitmap;image/x-portable-graymap;image/x-portable-pixmap;image/tiff;image/x-xpixmap;image/x-xbitmap;image/x-tga;image/x-icns;image/jp2;image/jpeg2000;image/jpx;image/x-quicktime;image/qtif;image/x-canon-cr2;image/x-canon-crw;image/x-minolta-mrw;image/x-nikon-nef;image/x-adobe-dng;image/x-pentax-pef;image/x-panasonic-raw2;image/x-samsung-srw;image/x-olympus-orf;
