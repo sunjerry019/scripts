@@ -1,0 +1,371 @@
+#!/bin/bash
+
+TC='\e['
+
+CLR_LINE_START="${TC}1K"
+CLR_LINE_END="${TC}K"
+CLR_LINE="${TC}2K"
+
+Bold="${TC}1m"    # Bold text only, keep colors
+Undr="${TC}4m"    # Underline text only, keep colors
+Inv="${TC}7m"     # Inverse: swap background and foreground colors
+Reg="${TC}22;24m" # Regular text only, keep colors
+RegF="${TC}39m"   # Regular foreground coloring
+RegB="${TC}49m"   # Regular background coloring
+Rst="${TC}0m"     # Reset all coloring and style
+
+Red="${TC}31m";
+White="${TC}37m";
+Cyan="${TC}36m";
+Green="${TC}32m";
+Purple="${TC}35m";
+Yellow="${TC}33m";
+
+ROOT_UID="0";
+UPDATEONLY=0;
+CLEANONLY=0;
+NOTEXLIVE=0;
+NOUPDATEMIRROR=0;
+NOUPDATEPIP=0;
+NOUPDATEPECL=0;
+NOSYSTEMUPDATE=0;
+NOUPDATEFISH=0;
+
+# Absolute path to this script, e.g. /home/user/bin/foo.sh
+#SCRIPT=$(readlink -f "$0")
+# Absolute path this script is in, thus /home/user/bin
+#SCRIPTPATH=$(dirname "$SCRIPT")
+
+#Check if run as root
+#if [ "$UID" -ne "$ROOT_UID" ] ; then
+#   #echo -e "${Bold}${Red}\n\tPlease run this with root!\n${Rst}"
+#   sudo ${SCRIPT}
+#   exit 1
+#fi
+
+#alias alert_helper='history|tail -n1|sed -e "s/^\s*[0-9]\+\s*//" -e "s/;\s*alert$//"'
+#alias alert='notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "[$?] $(alert_helper)"'
+
+#check for flags
+OPTIONS=hctumpPxf
+LONGOPTIONS=help,cleanup,skiptexlive,skiptoupdate,nomirror,nopip,noPECL,nosystemupdate,nofish
+
+# https://stackoverflow.com/a/29754866
+
+# -temporarily store output to be able to check for errors
+# -e.g. use “--options” parameter by name to activate quoting/enhanced mode
+# -pass arguments only via   -- "$@"   to separate them correctly
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+if [[ $? -ne 0 ]]; then
+    # e.g. $? == 1
+    #  then getopt has complained about wrong arguments to stdout
+    exit 2
+fi
+# read getopt’s output this way to handle the quoting right:
+eval set -- "$PARSED"
+
+# now enjoy the options in order and nicely split until we see --
+while true; do
+    case "$1" in
+        -h|--help)
+            echo ""
+            echo -e "\t-h --help \t\t Display help"
+            echo -e "\t-c --cleanup \t\t Clean and backup only (equivalent to -muxtp), yay -Sc for more intense cleanup"
+            echo -e "\t-u --skiptoupdate \t Jump straight to updates; Skip cleaning and reflector before update"
+            echo -e "\t-m --nomirror \t\t Skip reflector mirror update"
+            echo -e "\t-p --nopip \t\t Skip pip update"
+            echo -e "\t-x --nosystemupdate \t Skip system update"
+            echo -e "\t-f --nofish \t Skip fish/omf update"
+            echo ""
+            echo -e "\t-muxfPt \t Just update pip"
+            echo -e "\t-muxfPp \t Just update TexLive"
+            echo ""
+            exit 0
+            shift
+            ;;
+        -c|--cleanup)
+            echo "Cleaning and backing up only...." >&2
+            CLEANONLY=1
+            shift
+            ;;
+        -u|--skiptoupdate)
+            echo "Jumping straight to updates..." >&2
+            UPDATEONLY=1
+            shift
+            ;;
+        -m|--nomirror)
+            echo "Skipping reflector mirror update..." >&2
+            NOUPDATEMIRROR=1
+            shift
+            ;;
+        -p|--nopip)
+            echo "Skipping pip update..." >&2
+            NOUPDATEPIP=1
+            shift
+            ;;
+        -x|--nosystemupdate)
+            echo "Skipping system update..." >&2
+            NOSYSTEMUPDATE=1
+            shift
+            ;;
+        -f|--nofish)
+            echo "Skipping fish/omf update..." >&2
+            NOUPDATEFISH=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "options error" >&2
+            echo "Use option -h or --help for help" >&2
+            exit 3
+            ;;
+    esac
+done
+
+# notify code
+function notifyError
+{
+    # alternatively notifyError()
+    # notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "maintain" $1
+    # notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/applications-system-orange.svg "maintain" "$1"
+
+}
+
+function notifyUser
+{
+    # alternatively notifyError()
+    # notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/terminal.svg "maintain" "$1"
+    # notify-send -i /usr/share/icons/Numix-Circle/48x48/apps/applications-system-orange.svg "maintain" $1
+
+}
+
+# Define the sections of code to run
+function cleanPackages
+{
+    ##### removes orphaned packages
+    echo -e "${Bold}${Cyan}::${White} Removing orphaned packages...${Rst}"
+    OP=$(pacman -Qdtq)
+
+    if [ -n "$OP" ]; then
+        yay -Rns $OP
+    else
+        echo -e "${Bold}${Cyan}==>${Rst}${White} No orphaned packages ${Rst}"
+    fi
+
+    echo -ne "\033]0;System Maintenance\007"
+
+    #removing unneeded cache packages
+    echo -e "${Bold}${Cyan}::${White} Removing all cached versions of each package, except for the most recent 3...${Rst}"
+    sudo paccache -r
+    
+    echo -e "${Bold}${Cyan}::${White} Removing all cached versions of uninstalled packages...${Rst}"
+    sudo paccache -ruk0
+
+    echo -e "${Bold}${Cyan}::${White} Running yay -Yc...${Rst}"
+    yay -Yc
+}
+
+function updateMirrorlist
+{
+    echo -ne "\033]0;System Maintenance\007"
+
+    ##### This will run reflector on mirrorlist, copying from backup first, overwriting
+    echo -e "${Bold}${Cyan}::${White} Running reflector to update mirrorlist...${Rst}"
+
+    ##### Make backup just in case something goes wrong
+    sudo cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.lastworkingcopy
+
+    ##### get mirrorlist
+    sudo curl -o /etc/pacman.d/mirrorlist.backup https://www.archlinux.org/mirrorlist/all/
+    sudo cp /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
+    sudo reflector --verbose -l 200 -p http --sort rate --save /etc/pacman.d/mirrorlist
+
+    if [ $? -ne 0 ]; then
+        echo -e "${Bold}${Cyan}==> ${Red}error:${White} Reflector encountered an error${Rst}"
+        echo -e "${Bold}${Cyan}==> ${Red}restoring...${White} Reverting to previous copy of mirrorlist${Rst}"
+        notifyError "reflector error"
+        sudo mv /etc/pacman.d/mirrorlist.lastworkingcopy /etc/pacman.d/mirrorlist
+        exit 1
+    else
+        sudo rm /etc/pacman.d/mirrorlist.lastworkingcopy
+    fi
+}
+
+function updateSystem
+{
+    echo -ne "\033]0;System Maintenance\007"
+
+    ##### update the system
+    echo -e "${Bold}${Cyan}::${White} Updating the system...${Rst}"
+ 
+    yay -Syu --upgrademenu --combinedupgrade --devel --answerclean N --answeredit N --answerupgrade N --noafterclean --noconfirm
+    #yaourt -Syua --devel --noconfirm
+    #aurman -Syu --devel --noconfirm --noedit
+    #yaourt -S $(pacman -Qqm)
+
+    if [ $? -ne 0 ]; then
+        echo -e "${Bold}${Cyan}==> ${Red}error:${White} yay encountered an error updating the system${Rst}"
+        notifyError "yay error"
+        control_c
+        exit 1
+    fi
+}
+
+function updatePip
+{
+    echo -ne "\033]0;System Maintenance\007"
+
+    ##### update pip packages
+    echo -e "${Bold}${Cyan}::${White} Updating Python pip packages...${Rst}"
+
+    # update pip itself
+    # sudo pip install --upgrade pip
+
+    OUTDATED=$(pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1)
+
+    # https://unix.stackexchange.com/a/146945 -z "${OUTDATED// }"
+
+    if [[ -n "$OUTDATED" ]]; then
+        echo "$OUTDATED" | sudo xargs -n1 pip install -U
+    else
+        echo -e "${Bold}${Cyan}==>${Rst}${White} No outdated pip packages ${Rst}"
+    fi
+
+    if [ $? -ne 0 ]; then
+        echo -e "${Bold}${Cyan}==> ${Red}error:${White} pip encountered an error updating packages${Rst}"
+        notifyError "pip update error; errors ignored"
+        # exit 1
+    fi
+}
+
+function cleanup
+{
+    # Nothing here, add as necessary
+}
+
+function backupPackages
+{
+    echo -ne "\033]0;System Maintenance\007"
+
+    ##### makes a backup of all packages installed
+    echo -e "${Bold}${Cyan}::${White} Making a backup of the current packages installed...${Rst}"
+    ##### from official repos
+    sudo -- sh -c 'pacman -Qqe | grep -v "$(pacman -Qqm)" > /opt/backup/pacman.lst'
+
+    if [ $? -ne 0 ]; then
+        echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up current packages installed${Rst}"
+        notifyError "current packages backup error"
+        control_c
+        exit 1
+    fi
+
+    ##### from AUR
+    sudo -- sh -c 'pacman -Qqm > /opt/backup/aur.lst'
+
+    if [ $? -ne 0 ]; then
+        echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up AUR packages installed${Rst}"
+        notifyError "AUR backup error"
+        control_c
+        exit 1
+    fi
+
+    ##### Python packages
+    #sudo -- sh -c 'pip list | sed -r "s:\s:\t:g" > /opt/backup/pypi.lst'
+    sudo -- sh -c 'pip list --format=columns > /opt/backup/pypi.lst'
+    
+
+    if [ $? -ne 0 ]; then
+        echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error backing up python packages installed${Rst}"
+        notifyError "pip backup error"
+        control_c
+        exit 1
+    fi
+}
+
+function updateFish
+{
+    echo -ne "\033]0;System Maintenance\007"
+    echo -e "${Bold}${Cyan}::${White} Updating fish/omf...${Rst}"
+    fish -c "omf update"
+
+    if [ $? -ne 0 ]; then
+        echo -e "${Bold}${Cyan}==> ${Red}error:${White} error encountered updating omf${Rst}"
+        notifyError "omf update error"
+        control_c
+        exit 1
+    fi
+}
+
+function control_c() {
+    echo -e "\n>>>> Killing sudo -v, and processes $sudopid $thispid $childpid"
+    sudo -k
+    kill $sudopid
+    kill $thispid
+    # kill $childpid
+    exit 1
+}
+
+thispid=$$
+# childpid=$BASHPID
+
+sudo echo -ne "\033]0;System Maintenance\007"
+if [ $? -ne 0 ]; then
+    control_c
+fi
+echo -e "${Bold}${Green}::${White} Starting sudo -v ${Rst}"
+# https://serverfault.com/a/205504
+while : ; do sudo -v; sleep 30; done & sudopid=$!
+
+if [ $? -eq 0 ]; then
+
+    if sudo -n true 2>/dev/null; then 
+        echo "sudo activated"
+        trap control_c SIGINT
+    else
+        echo "I don't have sudo"
+        control_c
+    fi
+
+    if [ $CLEANONLY -eq 0 ]; then
+        if [ $UPDATEONLY -eq 0 ]; then
+            cleanPackages
+            if [ $NOUPDATEMIRROR -eq 0 ]; then
+                updateMirrorlist
+            fi
+        fi
+
+        if [ $NOSYSTEMUPDATE -eq 0 ]; then
+            updateSystem
+        fi
+
+        if [ $NOUPDATEPIP -eq 0 ]; then
+            updatePip
+        fi
+
+        if [ $NOUPDATEFISH -eq 0 ]; then
+            updateFish
+        fi
+    fi
+
+    # cleanup
+    cleanPackages
+    backupPackages
+
+    echo -e "${Bold}${Green}::${White} Killing sudo -v ${Rst}"
+    kill $sudopid #%1
+    sudo -k
+    
+    echo -e "${Bold}${Green}::${White} Done!${Rst}"
+    notifyUser "System Maintenance Done!"
+    echo -e "\n>>>> Killing sudo -v, and processes $sudopid $thispid $childpid"
+    sudo -k
+    kill $sudopid
+    kill $thispid
+
+else
+    control_c
+    exit 1
+fi
