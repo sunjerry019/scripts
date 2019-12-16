@@ -4,7 +4,7 @@ WEG=$(dirname $1)
 BAS=$(basename $1 .pdf)
 
 # Separate it
-mutool poster -y 2 "$1" "$WEG/$BAS-separated.pdf"
+mutool poster -y 2 "$1" "$WEG/$BAS-separated.pdf" 
 
 # Combine into 4/page
 pdfjam "$WEG/$BAS-separated.pdf" --nup 2x2 --landscape --outfile "$WEG/$BAS-noholes.pdf"

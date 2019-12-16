@@ -1,0 +1,7 @@
+#!/bin/bash
+
+WEG=$(dirname $1)
+BAS=$(basename $1 .java)
+
+cd "$WEG"
+javac "$BAS.java" && echo "Compiled" && java "$BAS"

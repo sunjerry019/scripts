@@ -10,8 +10,12 @@ Rst="${TC}0m"     # Reset all coloring and style
 
 Green="${TC}32m";
 
+ROOTFOLDER="/run/media/sunyudong/YDBackupPlus/LenovoLaptopBackup/"
+
 master_dir="/mnt/data"
-backup_dir="/run/media/sunyudong/YDPassport/LenovoLaptopBackup/Data_(D)"
+# backup_dir="/run/media/sunyudong/YDPassport/LenovoLaptopBackup/Data_(D)"
+backup_dir="$ROOTFOLDER/Data"
+
 master_filelist="$backup_dir/../Data_D_masterfilelist.bak"
 backup_filelist="$backup_dir/../Data_D_backupfilelist.bak"
 
@@ -19,7 +23,7 @@ backup_filelist="$backup_dir/../Data_D_backupfilelist.bak"
 #invdiff_filelist="$backup_dir/../Data_D_filelist.diff.inv.bak"
 
 arch_master_dir="/opt/backup"
-arch_backup_dir="/run/media/sunyudong/YDPassport/LenovoLaptopBackup/Arch_FS/opt/backup"
+arch_backup_dir="$ROOTFOLDER/Arch_FS/opt/backup"
 
 
 #master_dir="/home/sunyudong/1" # trailing slash necessary when running rsync
