@@ -415,11 +415,15 @@ function control_c() {
     kill $sudopid
     kill $thispid
     # kill $childpid
+    BUILDDIR=$OLDBUILDDIR
     exit 1
 }
 
 thispid=$$
 # childpid=$BASHPID
+
+OLDBUILDDIR=$BUILDDIR
+export BUILDDIR="/mnt/data/Linux/working/yay"
 
 sudo echo -ne "\033]0;System Maintenance\007"
 if [ $? -ne 0 ]; then
@@ -473,6 +477,8 @@ if [ $? -eq 0 ]; then
             updateTexLive
         fi
     fi
+
+    export BUILDDIR=$OLDBUILDDIR
 
     echo -e "${Bold}${Green}::${White} Killing sudo -v ${Rst}"
     kill $sudopid #%1
