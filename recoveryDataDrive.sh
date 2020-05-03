@@ -10,7 +10,74 @@ Rst="${TC}0m"     # Reset all coloring and style
 
 Green="${TC}32m";
 
-ROOTFOLDER="/run/media/sunyudong/YDBackupPlus/LenovoLaptopBackup/"
+restorefiles=0
+
+OPTIONS=rslh
+LONGOPTIONS=restore,silo,local,help
+
+# https://stackoverflow.com/a/29754866
+# https://www.codebyamir.com/blog/parse-command-line-arguments-using-getopt
+
+# -temporarily store output to be able to check for errors
+# -e.g. use “--options” parameter by name to activate quoting/enhanced mode
+# -pass arguments only via   -- "$@"   to separate them correctly
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+if [[ $? -ne 0 ]]; then
+    # e.g. $? == 1
+    #  then getopt has complained about wrong arguments to stdout
+    exit 2
+fi
+# read getopt’s output this way to handle the quoting right:
+eval set -- "$PARSED"
+
+# now enjoy the options in order and nicely split until we see --
+while true; do
+    case "$1" in
+        -r|--restore)
+            restorefiles=1
+            shift
+            ;;
+        -s|--silo)
+            ROOTFOLDER="/mnt/silo/mounts/YDPassport/LenovoLaptopBackup/"
+            shift
+            ;;
+        -l|--local)
+            ROOTFOLDER="/run/media/sunyudong/YDBackupPlus/LenovoLaptopBackup/"
+            shift
+            ;;
+        -h|--help)
+            echo -e "Usage: cmd [-s|--silo] [-l|--local]\n\n-s|--silo\tBackup to silo\n-l|--local\tBackup locally (Default)"
+            exit 0
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo -e "options error\n\nUsage: cmd [-s] [-l]\n\n-s for backing up to silo\nDefault to -l = local"
+            exit 3
+            ;;
+    esac
+done
+
+# https://stackoverflow.com/a/13864829
+if [ -z ${ROOTFOLDER+x} ]; then
+	ROOTFOLDER="/run/media/sunyudong/YDBackupPlus/LenovoLaptopBackup/"
+fi
+
+# handle non-option arguments
+#if [[ $# -ne 1 ]]; then
+#    echo "$0: A single input file is required."
+#    exit 4
+#fi
+
+if [ -d "$ROOTFOLDER" ]; then
+	echo -e "Backing up to ${ROOTFOLDER}...\n\n"
+else
+	echo "${ROOTFOLDER} not found. Exiting..."
+	exit 1
+fi
 
 master_dir="/mnt/data"
 # backup_dir="/run/media/sunyudong/YDPassport/LenovoLaptopBackup/Data_(D)"
@@ -32,49 +99,6 @@ arch_backup_dir="$ROOTFOLDER/Arch_FS/opt/backup"
 #backup_filelist="$backup_dir/../backupfilelist.bak"
 # diff_filelist="$backup_dir/../filelist.diff.bak"
 # invdiff_filelist="$backup_dir/../filelist.diff.inv.bak"
-
-restorefiles=0
-
-OPTIONS=r
-LONGOPTIONS=restore
-
-# https://stackoverflow.com/a/29754866
-
-# -temporarily store output to be able to check for errors
-# -e.g. use “--options” parameter by name to activate quoting/enhanced mode
-# -pass arguments only via   -- "$@"   to separate them correctly
-PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
-if [[ $? -ne 0 ]]; then
-    # e.g. $? == 1
-    #  then getopt has complained about wrong arguments to stdout
-    exit 2
-fi
-# read getopt’s output this way to handle the quoting right:
-eval set -- "$PARSED"
-
-# now enjoy the options in order and nicely split until we see --
-while true; do
-    case "$1" in
-        -r|--restore)
-            restorefiles=1
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *)
-            echo "options error"
-            exit 3
-            ;;
-    esac
-done
-
-# handle non-option arguments
-#if [[ $# -ne 1 ]]; then
-#    echo "$0: A single input file is required."
-#    exit 4
-#fi
 
 function backup
 {
