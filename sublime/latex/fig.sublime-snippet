@@ -1,0 +1,11 @@
+<snippet>
+	<content><![CDATA[\begin{figure}[!ht]
+    \centering
+    \includegraphics{$1}
+    \caption{$2}
+    \label{fig:$3}
+\end{figure}$0]]></content>
+	<tabTrigger>fig</tabTrigger>
+	<scope>text.tex.latex</scope>
+	<description>Full Fig</description>
+</snippet>

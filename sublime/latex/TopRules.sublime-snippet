@@ -1,0 +1,10 @@
+<snippet>
+	<content><![CDATA[\toprule
+$1
+\midrule
+$0
+\bottomrule]]></content>
+	<tabTrigger>\toprule</tabTrigger>
+	<scope>text.tex.latex</scope>
+	<description>Booktabs</description>
+</snippet>

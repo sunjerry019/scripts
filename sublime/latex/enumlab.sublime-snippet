@@ -1,0 +1,8 @@
+<snippet>
+	<content><![CDATA[\\begin{enumerate}[label={$1}]
+	\item $0
+\\end{enumerate}]]></content>
+	<tabTrigger>enumlab</tabTrigger>
+	<scope>text.tex.latex</scope>
+	<description>Enumerate with Label</description>
+</snippet>
