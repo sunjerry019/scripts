@@ -30,10 +30,11 @@ function fish_prompt --description 'Write out the prompt'
     set -g __fish_git_prompt_char_dirtystate "+"
     
     if test -z $WINDOW
-        printf '[%s%s%s@%s%s] %s%s%s%s > ' (set_color brgreen) (whoami) (set_color brcyan) (prompt_hostname) (set_color normal) (set_color $fish_color_cwd) (prompt_pwd) (set_color normal) (__fish_git_prompt)
+        printf '[%s%s%s@%s%s] %s%s%s%s' (set_color brgreen) (whoami) (set_color brcyan) (prompt_hostname) (set_color normal) (set_color $fish_color_cwd) (prompt_pwd) (set_color normal) (__fish_git_prompt)
     else
-        printf '[%s%s%s@%s%s(%s)]%s%s%s%s > ' (set_color brgreen) (whoami) (set_color brcyan) (prompt_hostname) (set_color normal) (echo $WINDOW) (set_color $fish_color_cwd) (prompt_pwd) (set_color normal) (__fish_git_prompt)
+        printf '[%s%s%s@%s%s(%s)]%s%s%s%s' (set_color brgreen) (whoami) (set_color brcyan) (prompt_hostname) (set_color normal) (echo $WINDOW) (set_color $fish_color_cwd) (prompt_pwd) (set_color normal) (__fish_git_prompt)
     end
+    printf '\n > '
 
     if not test $last_status -eq 0
         set_color $fish_color_error

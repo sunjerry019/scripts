@@ -24,10 +24,13 @@ cp "$FILE.pdf" "$FILE-crop.pdf" \
 && ps2pdf "book-$FILE.ps" "book-$FILE.pdf" &> /dev/null \
 \
 && echo "+ pdfnup book-$FILE.pdf --nup 2x1 --suffix '2x1'" \
-&& pdfnup "book-$FILE.pdf" --nup 2x1 --suffix '2x1' &> /dev/null \
+&& pdfjam "book-$FILE.pdf" --nup 2x1 --suffix '2x1' --landscape &> /dev/null \
 \
-&& echo "+ pdftk book-$FILE-2x1.pdf cat 1-endE output $FILE-booklet.pdf" \
-&& pdftk "book-$FILE-2x1.pdf" cat 1-endeast output "$FILE-booklet.pdf" \
+&& mv "book-$FILE-2x1.pdf" "$FILE-booklet.pdf" \
 \
 && echo "cleaning..." \
-&& rm "$FILE-crop.pdf" "$FILE-crop.ps" "book-$FILE.ps" "book-$FILE.pdf" "book-$FILE-2x1.pdf"
+&& rm "$FILE-crop.pdf" "$FILE-crop.ps" "book-$FILE.ps" "book-$FILE.pdf" 
+# "book-$FILE-2x1.pdf"
+
+# && echo "+ pdftk book-$FILE-2x1.pdf cat 1-endE output $FILE-booklet.pdf" \
+# && pdftk "book-$FILE-2x1.pdf" cat 1-endeast output "$FILE-booklet.pdf" \
