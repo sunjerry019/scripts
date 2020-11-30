@@ -1,0 +1,11 @@
+[Unit]
+Description=Persistent tunnel to LRZ
+After=network.target
+After=network-online.target
+
+[Service]
+ExecStart=/home/sunyudong/scripts/vpn.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
