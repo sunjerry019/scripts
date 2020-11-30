@@ -11,16 +11,21 @@ if [ -z "$1" ]; then
     exit 1;
 fi
 
+if ["$1" == "tun0"]; then
+    echo "$0: called with tun0" 1>&2
+    exit 0;
+fi
+
 # Run the right scripts
 case "$2" in
-    up|vpn-up)
+    up)
     logger -s "Restarting LRZ VPN"
-    systemctl stop lrz-vpn.service;
-    systemctl start lrz-vpn.service;
+    sleep 2
+    systemctl restart lrz-vpn.service
     ;;
-    down|vpn-down)
-    logger -s "Stopping LRZ VPN"
-    systemctl stop lrz-vpn.service;
+    down)
+    # logger -s "Stopping LRZ VPN"
+    # systemctl stop lrz-vpn.service;
     ;;
     hostname|dhcp4-change|dhcp6-change)
     # Do nothing
