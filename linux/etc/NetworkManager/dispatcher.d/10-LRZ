@@ -1,0 +1,32 @@
+#!/bin/sh -e
+# Script to dispatch NetworkManager events
+#
+# Runs ifupdown scripts when NetworkManager fiddles with interfaces.
+# See NetworkManager(8) for further documentation of the dispatcher events.
+
+# https://stackoverflow.com/a/16848872/3211506
+
+if [ -z "$1" ]; then
+    echo "$0: called with no interface" 1>&2
+    exit 1;
+fi
+
+# Run the right scripts
+case "$2" in
+    up|vpn-up)
+    logger -s "Restarting LRZ VPN"
+    systemctl stop lrz-vpn.service;
+    systemctl start lrz-vpn.service;
+    ;;
+    down|vpn-down)
+    logger -s "Stopping LRZ VPN"
+    systemctl stop lrz-vpn.service;
+    ;;
+    hostname|dhcp4-change|dhcp6-change)
+    # Do nothing
+    ;;
+    *)
+    echo "$0: called with unknown action \`$2'" 1>&2
+    exit 1
+    ;;
+esac
