@@ -1,0 +1,16 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = nextcloud
+Target = nextcloud-app-*
+  
+[Action]
+Description = Update Nextcloud installation
+When = PostTransaction
+Exec = /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ upgrade
+
+[Action]
+Description = Clearing REDIS Cache after Nextcloud update
+When = PostTransaction
+Exec = /usr/bin/redis-cli -s /run/redis/redis.sock FLUSHALL
