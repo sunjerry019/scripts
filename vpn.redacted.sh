@@ -17,6 +17,19 @@ function startOpenConnect {
     echo "<REDACTED>" | sudo openconnect --protocol=anyconnect --user=ru27xew --authgroup="AnyConnect+IPv6" --passwd-on-stdin asa-cluster.lrz.de & OPENCONNECT_PID=$!
 }
 
+function exit_script {
+	# Clear the lock
+	rm /home/sunyudong/.lrzlock
+
+    trap - SIGINT SIGTERM # clear the trap
+    kill -- -$$ # Sends SIGTERM to child/sub processes
+}
+
+trap exit_script SIGINT SIGTERM
+
+# Make a lock
+touch /home/sunyudong/.lrzlock && chown sunyudong:sunyudong /home/sunyudong/.lrzlock
+
 startOpenConnect
 
 while true

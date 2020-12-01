@@ -11,8 +11,13 @@ if [ -z "$1" ]; then
     exit 1;
 fi
 
-if ["$1" == "tun0"]; then
+if [ "$1" == "tun0" ]; then
     echo "$0: called with tun0" 1>&2
+    exit 0;
+fi
+
+if [ ! -f "/home/sunyudong/.lrzlock" ]; then
+    echo ".lrzlock missing" 1>&2
     exit 0;
 fi
 
