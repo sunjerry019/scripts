@@ -146,3 +146,6 @@ load-module module-filter-apply
 
 load-module module-echo-cancel source_name=NoiseCancelling source_properties=device.description=PA-NoCa
 set-default-source NoiseCancelling
+
+load-module module-null-sink sink_name=DummySink
+update-sink-proplist DummySink device.description=DummySink
