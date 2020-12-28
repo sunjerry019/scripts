@@ -1,0 +1,12 @@
+[Unit]
+Description=DDNS Service to update CloudFlare
+After=network.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/sunyudong/systemd/ddns.sh
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

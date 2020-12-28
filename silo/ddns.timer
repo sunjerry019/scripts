@@ -1,0 +1,9 @@
+[Unit]
+Description=Run DDNS hourly
+
+[Timer]
+OnStartupSec=15
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target
