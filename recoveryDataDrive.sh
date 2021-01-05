@@ -11,6 +11,7 @@ Rst="${TC}0m"     # Reset all coloring and style
 Green="${TC}32m";
 
 restorefiles=0
+SILO=0
 
 OPTIONS=rslh
 LONGOPTIONS=restore,silo,local,help
@@ -38,7 +39,9 @@ while true; do
             shift
             ;;
         -s|--silo)
-            ROOTFOLDER="/mnt/silo/mounts/YDPassport/LenovoLaptopBackup/"
+            # ROOTFOLDER="/mnt/silo/mounts/YDPassport/LenovoLaptopBackup/"
+            ROOTFOLDER="/home/sunyudong/0_backup/LenovoLaptop"
+            SILO=1
             shift
             ;;
         -l|--local)
@@ -74,6 +77,8 @@ fi
 
 if [ -d "$ROOTFOLDER" ]; then
 	echo -e "Backing up to ${ROOTFOLDER}...\n\n"
+elif [[ $SILO == 1 ]]; then
+	echo -e "Backing up to arch.yudong.dev:${ROOTFOLDER}...\n\n"
 else
 	echo "${ROOTFOLDER} not found. Exiting..."
 	exit 1
@@ -83,8 +88,14 @@ master_dir="/mnt/data"
 # backup_dir="/run/media/sunyudong/YDPassport/LenovoLaptopBackup/Data_(D)"
 backup_dir="$ROOTFOLDER/Data"
 
-master_filelist="$backup_dir/../Data_D_masterfilelist.bak"
-backup_filelist="$backup_dir/../Data_D_backupfilelist.bak"
+if [[ $SILO == 1 ]]; then
+	tmpdir="/home/sunyudong/backup"
+	master_filelist="$tmpdir/Data_D_masterfilelist.bak"
+	backup_filelist="$ROOTFOLDER/Data_D_backupfilelist.bak"
+else
+	master_filelist="$backup_dir/../Data_D_masterfilelist.bak"
+	backup_filelist="$backup_dir/../Data_D_backupfilelist.bak"
+fi
 
 #diff_filelist="$backup_dir/../Data_D_filelist.diff.bak"
 #invdiff_filelist="$backup_dir/../Data_D_filelist.diff.inv.bak"
@@ -106,17 +117,34 @@ function backup
 		cd $master_dir
 		find > "$master_filelist"
 		find -not \( -path ./Linux/working -prune \) -not \( -path ./Cloud/Dropbox -prune \) > "$master_filelist.trim"
+
+		if [[ $SILO == 1 ]]; then
+			scp -P 2022 $tmpdir/* arch.yudong.dev:"$ROOTFOLDER"
+		fi
+
 	printf "${Bold}${Green} Generating filelist for master directory...Done\n${Rst}"
 
 	printf "${Bold}${Green} Generating filelist for backup directory...\r${Rst}"
-		cd $backup_dir
-		# https://stackoverflow.com/a/16595367
-		find -not \( -path ./0_Archive -prune \) > "$backup_filelist"
+		if [[ $SILO == 1 ]]; then
+			strng="cd "$backup_dir" && find -not \\\\( -path ./0_Archive -prune \\) > $backup_filelist"
+			echo $strng
+			ssh -p 2022 arch.yudong.dev /bin/sh -c \"$strng\"
+		else
+			cd $backup_dir
+			# https://stackoverflow.com/a/16595367
+			find -not \( -path ./0_Archive -prune \) > "$backup_filelist"
+		fi		
 	printf "${Bold}${Green} Generating filelist for backup directory...Done\n${Rst}"
 
 	printf "${Bold}${Green} Running rsync...\n${Rst}"
 	tail -n +2 "$master_filelist.trim" > "$master_filelist.trim.cut"
-	rsync -aAuvX --files-from="$master_filelist.trim.cut" --progress "$master_dir/" "$backup_dir"
+
+	if [[ $SILO == 1 ]]; then
+		rsync -aAuvXz -e 'ssh -p 2022' --files-from="$master_filelist.trim.cut" --progress "$master_dir/" arch.yudong.dev:"$backup_dir"
+	else
+		rsync -aAuvX --files-from="$master_filelist.trim.cut" --progress "$master_dir/" "$backup_dir"
+	fi
+
 	rm "$master_filelist.trim.cut"
 
 	#	-a = archive = -rlptgoD
@@ -131,6 +159,7 @@ function backup
 	#	-u = update = skip files that are newer on the receiver
 	#	-v = verbose
 	#	-X = preserve extended attributes
+	#	-z = compress
 
 	printf "${Bold}${Green} Running rsync...Done\n${Rst}"
 }
@@ -138,7 +167,13 @@ function backup
 function backup_arch
 {
 	printf "${Bold}${Green} Backing up arch opt...\n${Rst}"
-	rsync -aAuvX --progress "$arch_master_dir/" "$arch_backup_dir"
+
+	if [[ $SILO == 1 ]]; then
+		sudo rsync -aAuvXz -e 'ssh -p 2022 -i /root/.ssh/silo_ed25519' --progress "$arch_master_dir/" sunyudong@arch.yudong.dev:"$arch_backup_dir"
+	else
+		sudo rsync -aAuvX --progress "$arch_master_dir/" "$arch_backup_dir"
+	fi
+
 	printf "${Bold}${Green} Backing up arch opt...Done\n${Rst}"
 }
 
@@ -149,7 +184,13 @@ function f_restore
 	#cd $backup_dir
 	#cp --preserve=all --verbose --update --recursive --parents $(cat $diff_filelist) $backup_dir 2>/dev/null
 	tail -n +2 "$master_filelist" > "$master_filelist.cut"
-	rsync -aAuHv --progress --files-from="$master_filelist.cut" "$backup_dir/" "$master_dir"
+
+	if [[ $SILO == 1 ]]; then
+		rsync -aAuHvz -e 'ssh -p 2022' --progress --files-from="$master_filelist.cut" arch.yudong.dev:"$backup_dir/" "$master_dir"
+	else
+		rsync -aAuHv --progress --files-from="$master_filelist.cut" "$backup_dir/" "$master_dir"
+	fi
+
 	rm "$master_filelist.cut"
 	printf "${Bold}${Green} Copying new files...Done\n${Rst}"
 }
