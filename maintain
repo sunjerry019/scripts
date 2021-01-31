@@ -191,8 +191,8 @@ function updateMirrorlist
     sudo cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.lastworkingcopy
 
     ##### get mirrorlist
-    sudo curl -o /etc/pacman.d/mirrorlist.backup https://www.archlinux.org/mirrorlist/all/
-    sudo cp /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
+    # sudo curl -o /etc/pacman.d/mirrorlist.backup https://www.archlinux.org/mirrorlist/all/
+    # sudo cp /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
     sudo reflector --verbose -l 200 -p http --sort rate --save /etc/pacman.d/mirrorlist
 
     if [ $? -ne 0 ]; then
