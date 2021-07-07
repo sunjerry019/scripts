@@ -6,7 +6,8 @@ IPv6=$(curl -sS -6 icanhazip.com)s
 
 #   DNS INFO
 ZONE="<redacted>"
-ID="<redacted>"
+ID4="<redacted>"
+ID6="<redacted>"
 ENTRY="<redacted>"
 # / DNS INFO
 
@@ -17,7 +18,7 @@ APITOKEN="<redacted>"
 
 AREC='{"type":"A","name":"'$ENTRY'","content":"'$IPv4'","ttl":1,"proxied":false}'
 
-RES=$(curl -sS -X PATCH "https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records/$ID" \
+RES=$(curl -sS -X PATCH "https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records/$ID4" \
      -H "Authorization: Bearer $APITOKEN" \
      -H "Content-Type: application/json" \
      --data $AREC)
@@ -33,7 +34,7 @@ fi
 if [[ ! -z "$IPv6" ]]; then
     AAAAREC='{"type":"AAAA","name":"'$ENTRY'","content":"'$IPv6'","ttl":1,"proxied":false}'
 
-    RES2=$(curl -sS -X PATCH "https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records/$ID" \
+    RES2=$(curl -sS -X PATCH "https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records/$ID6s" \
         -H "Authorization: Bearer $APITOKEN" \
         -H "Content-Type: application/json" \
         --data $AAAAREC)
@@ -41,7 +42,7 @@ if [[ ! -z "$IPv6" ]]; then
     if grep -q '"success":true' <<< "$RES2"; then
 	    echo "Successfully updated IP to $IPv6"
     else
-	    echo "Failure in update for ipv4."
+	    echo "Failure in update for ipv6."
 	    echo "Response: $RES2"
 	    exit 1
     fi
