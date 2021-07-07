@@ -1,0 +1,13 @@
+[Unit]
+Description=Persistent tunnel to MPQ
+After=network.target
+After=network-online.target
+Requires=lrz-vpn.service
+
+[Service]
+ExecStart=/home/sunyudong/scripts/mpq-vpn.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1 @@
+find "/run/media/sunyudong/YDBackupPlus/LenovoLaptopBackup/Data/Photos/" -mindepth 1 -maxdepth 1 | xargs -n1 -P4 -I {} rsync -rltgoDAuvXz -e 'ssh -p 2022' --progress "{}" arch.yudong.dev:"/home/sunyudong/0_backup/LenovoLaptop/Data/Photos/"
