@@ -4,7 +4,7 @@ After=network.target
 After=network-online.target
 
 [Service]
-ExecStart=/home/sunyudong/scripts/vpn.sh
+ExecStart=/home/yudong/scripts/vpn.sh
 Restart=always
 RestartSec=2
 
