@@ -230,27 +230,29 @@ function updatePip
 {
     echo -ne "\033]0;System Maintenance\007"
 
-    ##### update pip packages
-    echo -e "${Bold}${Cyan}::${White} Updating Python pip packages...${Rst}"
+    echo -e "${Bold}${Cyan}::${White} Skipping Python pip packages...${Rst}"
 
-    # update pip itself
-    # sudo pip install --upgrade pip
+    # ##### update pip packages
+    # echo -e "${Bold}${Cyan}::${White} Updating Python pip packages...${Rst}"
 
-    OUTDATED=$(pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1)
+    # # update pip itself
+    # # sudo pip install --upgrade pip
 
-    # https://unix.stackexchange.com/a/146945 -z "${OUTDATED// }"
+    # OUTDATED=$(pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1)
 
-    if [[ -n "$OUTDATED" ]]; then
-        echo "$OUTDATED" | sudo xargs -n1 pip install -U
-    else
-        echo -e "${Bold}${Cyan}==>${Rst}${White} No outdated pip packages ${Rst}"
-    fi
+    # # https://unix.stackexchange.com/a/146945 -z "${OUTDATED// }"
 
-    if [ $? -ne 0 ]; then
-        echo -e "${Bold}${Cyan}==> ${Red}error:${White} pip encountered an error updating packages${Rst}"
-        notifyError "pip update error; errors ignored"
-        # exit 1
-    fi
+    # if [[ -n "$OUTDATED" ]]; then
+    #     echo "$OUTDATED" | sudo xargs -n1 pip install -U
+    # else
+    #     echo -e "${Bold}${Cyan}==>${Rst}${White} No outdated pip packages ${Rst}"
+    # fi
+
+    # if [ $? -ne 0 ]; then
+    #     echo -e "${Bold}${Cyan}==> ${Red}error:${White} pip encountered an error updating packages${Rst}"
+    #     notifyError "pip update error; errors ignored"
+    #     # exit 1
+    # fi
 }
 
 
@@ -258,21 +260,27 @@ function updatePecl
 {
     echo -ne "\033]0;System Maintenance\007"
 
-    ##### update pip packages
+    if ! command -v pecl &> /dev/null
+    then
+        echo "pecl could not be found, skipping pecl update"
+        return
+    fi
+
+    ##### update pecl packages
     echo -e "${Bold}${Cyan}::${White} Updating PECL packages...${Rst}"
     sudo pecl update-channels
     sudo pecl upgrade
 
     if [ $? -ne 0 ]; then
         echo -e "${Bold}${Cyan}==> ${Red}error:${White} pecl encountered an error updating packages${Rst}"
-        notifyError "pip update error"
+        notifyError "pecl update error"
         control_c
         exit 1
     fi
 }
 
-function cleanup
-{
+# function cleanup
+# {
     # echo -ne "\033]0;System Maintenance\007"
 
     ##### update firefox
@@ -315,20 +323,20 @@ function cleanup
     #   exit 1
     # fi
 
-    echo -e "${Bold}${Cyan}> ::${White} Copying Firefox dockitem file...${Rst}"
+    # echo -e "${Bold}${Cyan}> ::${White} Copying Firefox dockitem file...${Rst}"
 
-    sudo cp "/home/sunyudong/AUR/firefox/firefox-developer.dockitem" "/home/sunyudong/.config/plank/dock1/launchers/firefox-developer.dockitem"
-    if [ $? -ne 0 ]; then
-        echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-developer.dockitem...${Rst}"
-        notifyError "copying firefox-developer.dockitem error"
-        control_c
-        exit 1
-    fi
+    # sudo cp "/home/sunyudong/AUR/firefox/firefox-developer.dockitem" "/home/sunyudong/.config/plank/dock1/launchers/firefox-developer.dockitem"
+    # if [ $? -ne 0 ]; then
+    #     echo -e "${Bold}${Cyan}==> ${Red}error:${White} Error encountered while copying firefox-developer.dockitem...${Rst}"
+    #     notifyError "copying firefox-developer.dockitem error"
+    #     control_c
+    #     exit 1
+    # fi
 
-    echo -e "${Bold}${Cyan}> ::${White} Restarting plank...${Rst}"
-    killall plank
-    nohup plank &
-}
+    # echo -e "${Bold}${Cyan}> ::${White} Restarting plank...${Rst}"
+    # killall plank
+    # nohup plank &
+# }
 
 function backupPackages
 {
