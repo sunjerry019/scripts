@@ -1,0 +1,11 @@
+[Unit]
+Description=Save brightness value from AMDGPU
+DefaultDependencies=no
+After=final.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/yudong/scripts/fix-brightness/fix-brightness.sh
+
+[Install]
+WantedBy=final.target
