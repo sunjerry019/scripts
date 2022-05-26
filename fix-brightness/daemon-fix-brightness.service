@@ -1,0 +1,11 @@
+[Unit]
+Description=Script to reset brightness on login
+After=multi-user.target
+
+[Service]
+ExecStart=/home/yudong/scripts/fix-brightness/watch-dbus-lock-unlock.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
