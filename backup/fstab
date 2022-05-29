@@ -1,0 +1,21 @@
+# Static information about the filesystems.
+# See fstab(5) for details.
+
+# <file system> <dir> <type> <options> <dump> <pass>
+# /dev/nvme0n1p6 LABEL=arch-linux
+UUID=9eb3b148-51e2-499c-a5f2-99423c4b738d	/         	btrfs     	rw,relatime,compress=zstd:3,ssd,space_cache,subvolid=256,subvol=/fs-root	0 0
+
+# /dev/nvme0n1p1 LABEL=SYSTEM
+UUID=12D8-E4FE      	/boot     	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0 2
+
+# /dev/nvme0n1p6 LABEL=Data
+# allow_other
+UUID=4212A39512A38D0B	/mnt/data         	ntfs      	rw,nosuid,nodev,uid=1000,gid=1000,umask=022,blksize=4096	0 0
+
+# /dev/nvme0n1p3 LABEL=OSi
+# allow_other
+UUID=FE24DAD424DA8F51	/mnt/windows         	ntfs      	rw,nosuid,nodev,uid=1000,gid=1000,umask=022,blksize=4096	0 0
+
+# /dev/nvme0n1p7
+UUID=09f4fc67-3664-44cc-b900-4e57fcee41e8	none      	swap      	defaults  	0 0
+
