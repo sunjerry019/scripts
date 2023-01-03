@@ -6,9 +6,12 @@ if [ "${1}" == "pre" ]; then
 	poweredOn=$?
 	if [ $poweredOn -eq 0 ]; then
 		# It is powered on
+		# we get any connected devices
+		# bluetoothctl devices Connected | awk '{ print $2 }' > /tmp/connectedBTDevices
 		bluetoothctl power off
 	fi
 	echo $poweredOn > /tmp/bluetoothstatus
+	
 elif [ "${1}" == "post" ]; then
 	poweredOn=$(cat /tmp/bluetoothstatus)
 	if [ $poweredOn -eq 0 ]; then
@@ -16,4 +19,9 @@ elif [ "${1}" == "post" ]; then
 		bluetoothctl power on
 	fi
 	rm /tmp/bluetoothstatus
+
+	# if [[ -f /tmp/connectedBTDevices ]]; then
+	#     cat /tmp/connectedBTDevices | xargs -I {} bluetoothctl connect {}
+	#     rm /tmp/connectedBTDevices
+	# fi
 fi
