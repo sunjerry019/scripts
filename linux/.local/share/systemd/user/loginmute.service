@@ -1,0 +1,11 @@
+[Unit]
+Description=Mute Audio on Login
+Requires=pulseaudio.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/pactl set-sink-mute @DEFAULT_SINK@ true
+StandardOutput=journal
+
+[Install]
+WantedBy=default.target

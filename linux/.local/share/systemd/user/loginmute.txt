@@ -1,0 +1,2 @@
+https://askubuntu.com/questions/26068/how-do-you-mute-from-the-command-line
+https://superuser.com/questions/1037466/how-to-start-a-systemd-service-after-user-login-and-stop-it-before-user-logout
