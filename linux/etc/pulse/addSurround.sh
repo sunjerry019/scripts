@@ -1,0 +1,1 @@
+pacmd load-module module-virtual-surround-sink sink_name=vsurround sink_properties=device.description=VirtualSurround hrir=/etc/pulse/hrir-1008.wav master=bluez_sink.2C_FD_B3_10_95_25.a2dp_sink
