@@ -1,0 +1,11 @@
+[Unit]
+Description=Set graphics to dedicated upon startup
+Requires=supergfxd.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/yudong/scripts/graphics/fix-supergfx.sh
+StandardOutput=journal
+
+[Install]
+WantedBy=default.target
