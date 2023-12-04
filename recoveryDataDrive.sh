@@ -15,6 +15,7 @@ SILO=0
 
 OPTIONS=rslh
 LONGOPTIONS=restore,silo,local,help
+HOMEDIR=/home/yudong
 
 # https://stackoverflow.com/a/29754866
 # https://www.codebyamir.com/blog/parse-command-line-arguments-using-getopt
@@ -45,7 +46,7 @@ while true; do
             shift
             ;;
         -l|--local)
-            ROOTFOLDER="/run/media/sunyudong/YDBackupPlus/LenovoLaptopBackup/"
+            ROOTFOLDER="/run/media/yudong/YDBackupPlus/LenovoLaptopBackup/"
             shift
             ;;
         -h|--help)
@@ -66,7 +67,7 @@ done
 
 # https://stackoverflow.com/a/13864829
 if [ -z ${ROOTFOLDER+x} ]; then
-	ROOTFOLDER="/run/media/sunyudong/YDBackupPlus/LenovoLaptopBackup/"
+	ROOTFOLDER="/run/media/yudong/YDBackupPlus/LenovoLaptopBackup/"
 fi
 
 # handle non-option arguments
@@ -89,7 +90,7 @@ master_dir="/mnt/data"
 backup_dir="$ROOTFOLDER/Data"
 
 if [[ $SILO == 1 ]]; then
-	tmpdir="/home/sunyudong/backup"
+	tmpdir="$HOMEDIR/backup"
 	master_filelist="$tmpdir/Data_D_masterfilelist.bak"
 	backup_filelist="$ROOTFOLDER/Data_D_backupfilelist.bak"
 else
@@ -119,7 +120,7 @@ function backup
 		find -not \( -path ./Linux/working -prune \) -not \( -path ./Cloud/Dropbox -prune \) > "$master_filelist.trim"
 
 		if [[ $SILO == 1 ]]; then
-			scp -P 2022 $tmpdir/* arch.yudong.dev:"$ROOTFOLDER"
+			sudo scp -i "/root/.ssh/silo_ed25519" -P 2022 $tmpdir/* sunyudong@arch.yudong.dev:"$ROOTFOLDER"
 		fi
 
 	printf "${Bold}${Green} Generating filelist for master directory...Done\n${Rst}"
@@ -128,7 +129,7 @@ function backup
 		if [[ $SILO == 1 ]]; then
 			strng="cd "$backup_dir" && find -not \\\\( -path ./0_Archive -prune \\) > $backup_filelist"
 			echo $strng
-			ssh -p 2022 arch.yudong.dev /bin/sh -c \"$strng\"
+			sudo ssh -i "/root/.ssh/silo_ed25519" -p 2022 sunyudong@arch.yudong.dev /bin/sh -c \"$strng\"
 		else
 			cd $backup_dir
 			# https://stackoverflow.com/a/16595367
@@ -140,7 +141,7 @@ function backup
 	tail -n +2 "$master_filelist.trim" > "$master_filelist.trim.cut"
 
 	if [[ $SILO == 1 ]]; then
-		rsync -aAuvXz -e 'ssh -p 2022' --files-from="$master_filelist.trim.cut" --progress "$master_dir/" arch.yudong.dev:"$backup_dir"
+		sudo rsync -aAuvXz -e "ssh -p 2022 -i /root/.ssh/silo_ed25519" --files-from="$master_filelist.trim.cut" --progress "$master_dir/" sunyudong@arch.yudong.dev:"$backup_dir"
 	else
 		rsync -aAuvX --files-from="$master_filelist.trim.cut" --progress "$master_dir/" "$backup_dir"
 	fi
