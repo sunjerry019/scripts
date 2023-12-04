@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Close LRZ Sync+Share Window
+GenericName=Close LRZ Sync+Share Window
+Comment=Close LRZ Sync+Share Window
+Exec=/home/yudong/scripts/LRZSyncShare/closeLRZSS.sh
+Terminal=false
+Type=Application
+X-GNOME-Autostart-enabled=true
