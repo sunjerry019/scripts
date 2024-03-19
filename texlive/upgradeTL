@@ -11,17 +11,42 @@ cat installed_texlive_packages.$LYEAR.txt | xargs -I _ -0 -n1 echo _ | awk '{pri
 wc -l installed_texlive_packages.$LYEAR.txt
 wc -l installed_texlive_packages.$LYEAR.trim.txt
 
-mkdir $YEAR
+mkdir -p $YEAR
 cd $YEAR
 # wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 wget http://ftp.fau.de/ctan/systems/texlive/tlnet/install-tl-unx.tar.gz
 tar -xvzf install-tl-unx.tar.gz
 cd $(ls -d */ | head -n 1)
-sudo tlmgr uninstall
+sudo tlmgr uninstall --all
 
 # https://askubuntu.com/a/76842/963448
+## Below parts might not work
 # sudo sed -i 's_texlive/$LYEAR_texlive/$YEAR_g' ~/.bash_profile ~/.profile /etc/profile.d/tex.sh /etc/profile.d/tex.csh 
-sudo sed -i "s_texlive/$LYEAR_texlive/$YEAR_g" /etc/profile.d/tex.sh /etc/profile.d/tex.csh 
+echo "Please manually change"
+echo "sudo sed -i 's_texlive/$LYEAR_texlive/$YEAR_g' /etc/profile.d/tex.sh /etc/profile.d/tex.csh"
+# THIS DOESN"T WORK FOR SOME REASON
+
+# https://linuxhint.com/bash_wait_keypress/
+echo "Press any key to continue"
+while [ true ] ; do
+	read -t 3 -n 1
+	if [ $? = 0 ] ; then
+		break
+	else
+		echo -ne "waiting for the keypress\r"
+	fi
+done
+
+temp=$(pwd)
+cd /usr/share/fonts/
+sudo rm latex_*
+sudo ln -s /usr/local/texlive/$YEAR/texmf-dist/fonts/opentype/ latex_opentype
+sudo ln -s /usr/local/texlive/$YEAR/texmf-dist/fonts/truetype/ latex_truetype
+cd $temp
+
+# mkdir /mnt/data/Linux/working/texlive/$YEAR
+# ln -s /mnt/data/Linux/working/texlive/$YEAR /usr/local/texlive/$YEAR
+
 cd $(ls -d */ | head -n 1)
-./install-tl
+sudo ./install-tl --repository="http://ftp.fau.de/ctan/systems/texlive/tlnet"
 
