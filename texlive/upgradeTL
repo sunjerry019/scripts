@@ -20,11 +20,7 @@ cd $(ls -d */ | head -n 1)
 sudo tlmgr uninstall --all
 
 # https://askubuntu.com/a/76842/963448
-## Below parts might not work
-# sudo sed -i 's_texlive/$LYEAR_texlive/$YEAR_g' ~/.bash_profile ~/.profile /etc/profile.d/tex.sh /etc/profile.d/tex.csh 
-echo "Please manually change"
-echo "sudo sed -i 's_texlive/$LYEAR_texlive/$YEAR_g' /etc/profile.d/tex.sh /etc/profile.d/tex.csh"
-# THIS DOESN"T WORK FOR SOME REASON
+sudo sed -i "s,texlive/$LYEAR,texlive/$YEAR,g" /etc/profile.d/tex.sh /etc/profile.d/tex.csh
 
 # https://linuxhint.com/bash_wait_keypress/
 echo "Press any key to continue"
