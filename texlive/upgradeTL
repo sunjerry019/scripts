@@ -19,7 +19,7 @@ tar -xvzf install-tl-unx.tar.gz
 cd $(ls -d */ | head -n 1)
 sudo tlmgr uninstall
 # sudo sed -i 's_texlive/$LYEAR_texlive/$YEAR_g' ~/.bash_profile ~/.profile /etc/profile.d/tex.sh /etc/profile.d/tex.csh 
-sudo sed -i 's_texlive/$LYEAR_texlive/$YEAR_g' /etc/profile.d/tex.sh /etc/profile.d/tex.csh 
+sudo sed -i "s_texlive/$LYEAR_texlive/$YEAR_g" /etc/profile.d/tex.sh /etc/profile.d/tex.csh 
 cd $(ls -d */ | head -n 1)
 ./install-tl
 
