@@ -46,3 +46,5 @@ cd $temp
 cd $(ls -d */ | head -n 1)
 sudo ./install-tl --repository="http://ftp.fau.de/ctan/systems/texlive/tlnet"
 
+# Change permissions here
+sudo chown -R $USER:$USER /usr/local/texlive/
