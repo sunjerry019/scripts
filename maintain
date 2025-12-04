@@ -214,7 +214,7 @@ function updateSystem
     echo -e "${Bold}${Cyan}::${White} Updating the system...${Rst}"
  
     # yay -Syu --upgrademenu --combinedupgrade --devel --answerclean N --answeredit N --answerupgrade N --noafterclean --noconfirm
-    yay -Syu --combinedupgrade --devel --answerclean N --answeredit N --answerupgrade N --noafterclean --noconfirm
+    yay -Syu --combinedupgrade --devel --answerclean N --answeredit N --answerupgrade N --cleanafter=false --noconfirm
     #yaourt -Syua --devel --noconfirm
     #aurman -Syu --devel --noconfirm --noedit
     #yaourt -S $(pacman -Qqm)

@@ -41,7 +41,7 @@ while true; do
             ;;
         -s|--silo)
             # ROOTFOLDER="/mnt/silo/mounts/YDPassport/LenovoLaptopBackup/"
-            ROOTFOLDER="/home/sunyudong/0_backup/LenovoLaptop"
+            ROOTFOLDER="/home/yudong/0_backup/LenovoLaptop"
             SILO=1
             shift
             ;;
@@ -120,7 +120,7 @@ function backup
 		find -not \( -path ./Linux/working -prune \) -not \( -path ./Cloud/Dropbox -prune \) > "$master_filelist.trim"
 
 		if [[ $SILO == 1 ]]; then
-			sudo scp -i "/root/.ssh/silo_ed25519" -P 2022 $tmpdir/* sunyudong@arch.yudong.dev:"$ROOTFOLDER"
+			sudo scp -i "/root/.ssh/silo_ed25519" -P 2022 $tmpdir/* yudong@arch.yudong.dev:"$ROOTFOLDER"
 		fi
 
 	printf "${Bold}${Green} Generating filelist for master directory...Done\n${Rst}"
@@ -129,19 +129,19 @@ function backup
 		if [[ $SILO == 1 ]]; then
 			strng="cd "$backup_dir" && find -not \\\\( -path ./0_Archive -prune \\) > $backup_filelist"
 			echo $strng
-			sudo ssh -i "/root/.ssh/silo_ed25519" -p 2022 sunyudong@arch.yudong.dev /bin/sh -c \"$strng\"
+			sudo ssh -i "/root/.ssh/silo_ed25519" -p 2022 yudong@arch.yudong.dev /bin/sh -c \"$strng\"
 		else
 			cd $backup_dir
 			# https://stackoverflow.com/a/16595367
 			find -not \( -path ./0_Archive -prune \) > "$backup_filelist"
-		fi		
+		fi
 	printf "${Bold}${Green} Generating filelist for backup directory...Done\n${Rst}"
 
 	printf "${Bold}${Green} Running rsync...\n${Rst}"
 	tail -n +2 "$master_filelist.trim" > "$master_filelist.trim.cut"
 
 	if [[ $SILO == 1 ]]; then
-		sudo rsync -aAuvXz -e "ssh -p 2022 -i /root/.ssh/silo_ed25519" --files-from="$master_filelist.trim.cut" --progress "$master_dir/" sunyudong@arch.yudong.dev:"$backup_dir"
+		sudo rsync -aAuvXz -e "ssh -p 2022 -i /root/.ssh/silo_ed25519" --files-from="$master_filelist.trim.cut" --progress "$master_dir/" yudong@arch.yudong.dev:"$backup_dir"
 	else
 		rsync -aAuvX --files-from="$master_filelist.trim.cut" --progress "$master_dir/" "$backup_dir"
 	fi
@@ -170,7 +170,7 @@ function backup_arch
 	printf "${Bold}${Green} Backing up arch opt...\n${Rst}"
 
 	if [[ $SILO == 1 ]]; then
-		sudo rsync -aAuvXz -e 'ssh -p 2022 -i /root/.ssh/silo_ed25519' --progress "$arch_master_dir/" sunyudong@arch.yudong.dev:"$arch_backup_dir"
+		sudo rsync -aAuvXz -e 'ssh -p 2022 -i /root/.ssh/silo_ed25519' --progress "$arch_master_dir/" yudong@arch.yudong.dev:"$arch_backup_dir"
 	else
 		sudo rsync -aAuvX --progress "$arch_master_dir/" "$arch_backup_dir"
 	fi
@@ -230,7 +230,7 @@ fi
 #
 #	# making any empty directories
 #	#printf "${Bold}${Green} Making any empty directories...\n${Rst}"
-#	#cd $backup_dir 
+#	#cd $backup_dir
 #	#mkdir -v $(cat $diff_filelist) 2>/dev/null
 #	#printf "${Bold}${Green} Making any empty directories...Done\n${Rst}"
 #
