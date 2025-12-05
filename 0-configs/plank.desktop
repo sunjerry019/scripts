@@ -62,7 +62,7 @@ Comment=Stupidly simple.
 Categories=Utility;
 Type=Application
 # Exec=sh -c "XDG_SESSION_TYPE=x11 plank"
-Exec=sh -c "env XDG_SESSION_TYPE=x11 GDK_BACKEND=x11 plank"
+Exec=sh -c "env XDG_SESSION_TYPE=x11 GDK_BACKEND=x11 plank &"
 Icon=plank
 Terminal=false
 NoDisplay=false
