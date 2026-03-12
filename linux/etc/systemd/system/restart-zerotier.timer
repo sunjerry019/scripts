@@ -1,0 +1,12 @@
+[Unit]
+Description=Restart zerotier daily
+
+[Timer]
+# Runs at 1:00 AM every day
+OnCalendar=*-*-* 01:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+# https://stackoverflow.com/a/40229577

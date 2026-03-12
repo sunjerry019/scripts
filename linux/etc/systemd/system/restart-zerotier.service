@@ -1,0 +1,7 @@
+[Unit]
+Description=Restart Zerotier
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl try-restart zerotier-one.service
+
